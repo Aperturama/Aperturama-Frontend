@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/routes/settings.dart';
 import 'package:frontend/routes/collections.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -28,7 +29,14 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const HomePage(title: 'Aperturama Home Page'),
+      initialRoute: '/',
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        '/': (context) => const HomePage(title: 'Aperturama Home Page'),
+        '/first': (context) => const FirstRoute(),
+        // When navigating to the "/second" route, build the SecondScreen widget.
+        '/second': (context) => const SecondRoute(),
+      },
     );
   }
 }
@@ -88,10 +96,7 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.list),
             onPressed: () {
               // Navigate to second route when tapped.
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FirstRoute()),
-              );
+              Navigator.pushNamed(context, '/second');
             },
             tooltip: 'First route test',
           ),

@@ -15,10 +15,7 @@ class FirstRoute extends StatelessWidget {
           child: const Text('Open route'),
           onPressed: () {
             // Navigate to second route when tapped.
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SecondRoute()),
-            );
+            Navigator.pushNamed(context, '/second');
           },
         ),
       ),
