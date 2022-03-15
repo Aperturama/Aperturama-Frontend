@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/routes/collections.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -82,6 +83,19 @@ class _HomePageState extends State<HomePage> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: () {
+              // Navigate to second route when tapped.
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FirstRoute()),
+              );
+            },
+            tooltip: 'First route test',
+          ),
+        ],
       ),
       body: GridView.count(
         // Create a grid with 2 columns. If you change the scrollDirection to
