@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:cached_network_image/cached_network_image.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -59,7 +61,7 @@ class _HomePageState extends State<HomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      if(_gridSize < _gridSizeMax) {
+      if (_gridSize < _gridSizeMax) {
         _gridSize++;
       } else {
         _gridSize = 1;
@@ -86,11 +88,31 @@ class _HomePageState extends State<HomePage> {
         // horizontal, this produces 2 rows.
         crossAxisCount: _gridSize,
         // Generate 100 widgets that display their index in the List.
-        children: List.generate(100, (index) {
+        children: List.generate(400, (index) {
           return Center(
-            child: Text(
-              'Item $index',
-              style: Theme.of(context).textTheme.headline5,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Item $index',
+                  //style: Theme.of(context).textTheme.headline5,
+
+                ),
+                Expanded(
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    child: CachedNetworkImage(
+                      imageUrl: 'https://picsum.photos/250?random=' + index.toString(),
+                      progressIndicatorBuilder: (context, url, downloadProgress) =>
+                          CircularProgressIndicator(value: downloadProgress.progress),
+                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         }),
