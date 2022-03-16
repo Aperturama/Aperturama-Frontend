@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/utils/main_drawer.dart';
+import 'package:aperturama/utils/main_drawer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../utils/main_drawer.dart';

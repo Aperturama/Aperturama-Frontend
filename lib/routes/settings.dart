@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/routes/collections.dart';
+import 'package:aperturama/routes/collections.dart';
 
 class Settings extends StatelessWidget {
   const Settings({Key? key}) : super(key: key);

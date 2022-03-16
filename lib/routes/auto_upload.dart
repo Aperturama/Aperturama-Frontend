@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/routes/collections.dart';
+import 'package:aperturama/routes/collections.dart';
 
 class AutoUpload extends StatelessWidget {
   const AutoUpload({Key? key}) : super(key: key);

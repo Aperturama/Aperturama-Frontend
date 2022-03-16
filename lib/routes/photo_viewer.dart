@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/routes/settings.dart';
+import 'package:aperturama/routes/settings.dart';
 
 class PhotoViewer extends StatelessWidget {
   const PhotoViewer({Key? key}) : super(key: key);

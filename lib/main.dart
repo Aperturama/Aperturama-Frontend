@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/routes/auto_upload.dart';
-import 'package:frontend/routes/collection_viewer.dart';
-import 'package:frontend/routes/photos.dart';
-import 'package:frontend/routes/settings.dart';
-import 'package:frontend/routes/collections.dart';
-import 'package:frontend/routes/shared.dart';
+import 'package:aperturama/routes/auto_upload.dart';
+import 'package:aperturama/routes/collection_viewer.dart';
+import 'package:aperturama/routes/photos.dart';
+import 'package:aperturama/routes/settings.dart';
+import 'package:aperturama/routes/collections.dart';
+import 'package:aperturama/routes/shared.dart';
 import 'package:http/http.dart' as http;
 
 
