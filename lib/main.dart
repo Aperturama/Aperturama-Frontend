@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/routes/auto_upload.dart';
+import 'package:frontend/routes/collection_viewer.dart';
+import 'package:frontend/routes/photos.dart';
 import 'package:frontend/routes/settings.dart';
 import 'package:frontend/routes/collections.dart';
+import 'package:frontend/routes/shared.dart';
 import 'package:http/http.dart' as http;
-import 'package:cached_network_image/cached_network_image.dart';
 
 
 void main() {
@@ -32,152 +35,15 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         // When navigating to the "/" route, build the FirstScreen widget.
-        '/': (context) => const HomePage(title: 'Aperturama Home Page'),
-        '/first': (context) => const FirstRoute(),
+        '/': (context) => const Photos(),
+        '/photos': (context) => const Photos(),
         // When navigating to the "/second" route, build the SecondScreen widget.
-        '/second': (context) => const SecondRoute(),
+        '/collections': (context) => const Collections(),
+        '/collection_viewer': (context) => const CollectionViewer(),
+        '/shared': (context) => const Shared(),
+        '/auto_upload': (context) => const AutoUpload(),
+        '/settings': (context) => const Settings(),
       },
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int _gridSize = 4;
-  final int _gridSizeMax = 8;
-
-  void _changeGridSize() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      if (_gridSize < _gridSizeMax) {
-        _gridSize++;
-      } else {
-        _gridSize = 1;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.list),
-            onPressed: () {
-              // Navigate to second route when tapped.
-              Navigator.pushNamed(context, '/second');
-            },
-            tooltip: 'First route test',
-          ),
-        ],
-      ),
-      body: GridView.count(
-        // Create a grid with 2 columns. If you change the scrollDirection to
-        // horizontal, this produces 2 rows.
-        crossAxisCount: _gridSize,
-        // Generate 100 widgets that display their index in the List.
-        children: List.generate(400, (index) {
-          return Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Item $index',
-                  //style: Theme.of(context).textTheme.headline5,
-
-                ),
-                Expanded(
-                  child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    child: CachedNetworkImage(
-                      imageUrl: 'https://picsum.photos/250?random=' + index.toString(),
-                      progressIndicatorBuilder: (context, url, downloadProgress) =>
-                          CircularProgressIndicator(value: downloadProgress.progress),
-                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _changeGridSize,
-        tooltip: 'Change Grid Size',
-        child: Text(_gridSize.toString()),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-
-
-      drawer: Drawer(
-        // Add a ListView to the drawer. This ensures the user can scroll
-        // through the options in the drawer if there isn't enough vertical
-        // space to fit everything.
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Text('Drawer Header'),
-            ),
-            ListTile(
-              title: const Text('Item 1'),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Item 2'),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

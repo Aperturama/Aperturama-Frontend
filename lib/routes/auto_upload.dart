@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/routes/collections.dart';
 
-class Settings extends StatelessWidget {
-  const Settings({Key? key}) : super(key: key);
+class AutoUpload extends StatelessWidget {
+  const AutoUpload({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
