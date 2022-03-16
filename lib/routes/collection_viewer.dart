@@ -1,3 +1,4 @@
+import 'package:aperturama/routes/collection_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -82,39 +83,67 @@ class _CollectionViewerState extends State<CollectionViewer> {
           ],
         ),
         body: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            GridView.count(
-              // Create a grid with 2 columns. If you change the scrollDirection to
-              // horizontal, this produces 2 rows.
-              crossAxisCount: _gridSize,
-              // Generate 100 widgets that display their index in the List.
-              children: List.generate(400, (index) {
-                return Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Card(
-                          clipBehavior: Clip.antiAlias,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          child: CachedNetworkImage(
-                            imageUrl: 'https://picsum.photos/250?random=' +
-                                index.toString(),
-                            progressIndicatorBuilder:
-                                (context, url, downloadProgress) =>
-                                    CircularProgressIndicator(
-                                        value: downloadProgress.progress),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
+            ListTile(
+              horizontalTitleGap: 0,
+              title: ListTile(
+                title: Transform(
+                  transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
+                  child: Text('Shared'),
+                ),
+                trailing: TextButton(
+                  child: const Text('Sharing Settings'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        barrierDismissible: true,
+                        opaque: false,
+                        pageBuilder: (_, anim1, anim2) => CollectionSettings(title: "potato"),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              subtitle: Text('42 Photos, 0 Videos'),
+              contentPadding: EdgeInsets.only(left: 14, bottom: 10),
+            ),
+            Expanded(
+              child: GridView.count(
+                shrinkWrap: true,
+                // Create a grid with 2 columns. If you change the scrollDirection to
+                // horizontal, this produces 2 rows.
+                crossAxisCount: _gridSize,
+                // Generate 100 widgets that display their index in the List.
+                children: List.generate(400, (index) {
+                  return Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Card(
+                            clipBehavior: Clip.antiAlias,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            child: CachedNetworkImage(
+                              imageUrl: 'https://picsum.photos/250?random=' +
+                                  index.toString(),
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) =>
+                                      CircularProgressIndicator(
+                                          value: downloadProgress.progress),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
+                      ],
+                    ),
+                  );
+                }),
+              ),
             ),
           ],
         ));

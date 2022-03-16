@@ -20,31 +20,6 @@ class Collections extends StatefulWidget {
 }
 
 class _CollectionsState extends State<Collections> {
-  int _gridSize = 4;
-  final int _gridSizeMax = 8;
-
-  void _changeGridSize(int amount) {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      if (amount < 0) {
-        if (_gridSize + amount <= 0) {
-          _gridSize = 1;
-        } else {
-          _gridSize += amount;
-        }
-      } else if (amount > 0) {
-        if (_gridSize + amount >= _gridSizeMax) {
-          _gridSize = _gridSizeMax;
-        } else {
-          _gridSize += amount;
-        }
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
