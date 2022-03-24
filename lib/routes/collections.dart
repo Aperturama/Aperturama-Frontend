@@ -41,7 +41,7 @@ class _CollectionsState extends State<Collections> {
             GestureDetector(
               onTap: () => {
                 Navigator.pushNamed(context, '/collection_viewer',
-                  arguments: CollectionArguments(
+                  arguments: CollectionDetails(
                     'Collection 1',
                     '42 Photos, 0 Videos',
                   ),
@@ -182,9 +182,9 @@ class _CollectionsState extends State<Collections> {
 }
 
 
-class CollectionArguments {
+class CollectionDetails {
   final String title;
   final String message;
 
-  CollectionArguments(this.title, this.message);
+  CollectionDetails(this.title, this.message);
 }

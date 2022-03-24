@@ -1,3 +1,4 @@
+import 'package:aperturama/routes/photo_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:aperturama/routes/auto_upload.dart';
 import 'package:aperturama/routes/collection_viewer.dart';
@@ -30,14 +31,13 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.indigo,
       ),
       initialRoute: '/',
       routes: {
-        // When navigating to the "/" route, build the FirstScreen widget.
         '/': (context) => const Photos(),
         '/photos': (context) => const Photos(),
-        // When navigating to the "/second" route, build the SecondScreen widget.
+        '/photo_viewer': (context) => const PhotoViewer(),
         '/collections': (context) => const Collections(),
         '/collection_viewer': (context) => const CollectionViewer(),
         '/shared': (context) => const Shared(),

@@ -51,7 +51,7 @@ class _CollectionViewerState extends State<CollectionViewer> {
   @override
   Widget build(BuildContext context) {
     final args =
-        ModalRoute.of(context)!.settings.arguments as CollectionArguments;
+        ModalRoute.of(context)!.settings.arguments as CollectionDetails;
 
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.

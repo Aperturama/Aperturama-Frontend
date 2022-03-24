@@ -24,6 +24,12 @@ class _PhotosState extends State<Photos> {
   int _gridSize = 4;
   final int _gridSizeMax = 8;
 
+  // Store the URLs for all the photos the app needs to download and cache
+  List<PhotoDetails> photos = [];
+  final int photoBufferAheadMin = 128;
+  final int photoBufferAheadStep = 512;
+
+  // Function to handle changing the size of the photo grid
   void _changeGridSize(int amount) {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -45,6 +51,59 @@ class _PhotosState extends State<Photos> {
         }
       }
     });
+  }
+
+  void _requestPhotos() {
+    // HTTP request using photoBufferAheadStep to get that many more photo urls
+
+    // For now, make up urls
+    for(int i = 0; i < photoBufferAheadStep; i++) {
+      photos.add(PhotoDetails(photos.length.toString(),
+          'https://picsum.photos/seed/aperturama/256?random=' + photos.length.toString(),
+          'https://picsum.photos/seed/aperturama/2048?random=' + photos.length.toString()
+      ));
+    }
+
+  }
+
+  Widget _createPhotoIcon(BuildContext context, int index) {
+
+    // Quick, get some more photos!
+    if(index + photoBufferAheadMin > photos.length) {
+      _requestPhotos();
+    }
+
+    return GestureDetector(
+      onTap: () => {
+        Navigator.pushNamed(context, '/photo_viewer',
+          arguments: photos[index]
+        )
+      },
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+                child: CachedNetworkImage(
+                  imageUrl: photos[index].thumbnailURL,
+                  progressIndicatorBuilder:
+                      (context, url, downloadProgress) =>
+                      CircularProgressIndicator(
+                          value: downloadProgress.progress),
+                  errorWidget: (context, url, error) =>
+                  const Icon(Icons.error),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -78,39 +137,25 @@ class _PhotosState extends State<Photos> {
             ),
           ],
         ),
-        body: GridView.count(
+        body: GridView.builder(
           // Create a grid with 2 columns. If you change the scrollDirection to
           // horizontal, this produces 2 rows.
-          crossAxisCount: _gridSize,
-          // Generate 100 widgets that display their index in the List.
-          children: List.generate(400, (index) {
-            return Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Card(
-                      clipBehavior: Clip.antiAlias,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                      child: CachedNetworkImage(
-                        imageUrl: 'https://picsum.photos/250?random=' +
-                            index.toString(),
-                        progressIndicatorBuilder:
-                            (context, url, downloadProgress) =>
-                                CircularProgressIndicator(
-                                    value: downloadProgress.progress),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
+          //crossAxisCount: _gridSize,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: _gridSize),
+          itemBuilder: (BuildContext context, int index) {
+            return _createPhotoIcon(context, index);
+          },
         ),
+        
         drawer: const MainDrawer());
   }
+}
+
+
+class PhotoDetails {
+  final String photoID;
+  final String thumbnailURL;
+  final String highresURL;
+
+  PhotoDetails(this.photoID, this.thumbnailURL, this.highresURL);
 }
