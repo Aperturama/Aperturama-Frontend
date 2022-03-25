@@ -59,8 +59,8 @@ class _PhotosState extends State<Photos> {
     // For now, make up urls
     for(int i = 0; i < photoBufferAheadStep; i++) {
       photos.add(PhotoDetails(photos.length.toString(),
-          'https://picsum.photos/seed/aperturama/256?random=' + photos.length.toString(),
-          'https://picsum.photos/seed/aperturama/2048?random=' + photos.length.toString()
+          'https://picsum.photos/seed/' + photos.length.toString() + '/256',
+          'https://picsum.photos/seed/' + photos.length.toString() + '/4096',
       ));
     }
 

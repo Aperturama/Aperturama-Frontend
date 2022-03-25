@@ -31,6 +31,42 @@ https://api.flutter.dev/flutter/material/AlertDialog-class.html
 https://stackoverflow.com/questions/48895195/how-can-we-change-the-width-padding-of-a-flutter-dropdownmenuitem-in-a-dropdown
 https://api.flutter.dev/flutter/material/DropdownButton-class.html
 https://www.woolha.com/tutorials/flutter-using-textbutton-widget-examples
+https://stackoverflow.com/questions/63605778/flutter-image-builder-callback-issue
+https://api.flutter.dev/flutter/widgets/InteractiveViewer-class.html
+https://docs.flutter.dev/cookbook/images/cached-images
+https://pub.dev/packages/cached_network_image/example
+https://docs.flutter.dev/cookbook/images/network-image
+https://fonts.google.com/icons
+https://codelabs.developers.google.com/codelabs/flutter
+https://docs.flutter.dev/cookbook/design/drawer
+https://docs.flutter.dev/cookbook/design/snackbars
+https://api.flutter.dev/flutter/material/Card-class.html
+https://medium.flutterdevs.com/expanded-and-flexible-in-flutter-68f58c7f3ce0
+https://stackoverflow.com/questions/58792875/popup-route-taking-all-the-screen
+https://api.flutter.dev/flutter/material/AlertDialog-class.html
+https://stackoverflow.com/questions/56565364/remove-grey-background-for-flutter-alert-dialog
+https://stackoverflow.com/questions/48895195/how-can-we-change-the-width-padding-of-a-flutter-dropdownmenuitem-in-a-dropdown
+https://stackoverflow.com/questions/68042594/how-can-i-write-multiple-images-urls-in-one-list-array-of-query-flutter-fireba
+https://stackoverflow.com/questions/67870088/how-to-dynamically-generate-a-grid-view-in-flutter
+https://api.flutter.dev/flutter/rendering/SliverGridDelegateWithFixedCrossAxisCount-class.html
+https://api.flutter.dev/flutter/rendering/SliverGridDelegate-class.html
+https://picsum.photos/
+https://stackoverflow.com/questions/43822671/how-do-i-set-the-background-color-of-my-main-screen-in-flutter
+https://stackoverflow.com/questions/68389109/flutter-container-overlay-widget
+https://api.flutter.dev/flutter/painting/BoxFit.html
+https://pub.dev/documentation/cached_network_image/latest/cached_network_image/CachedNetworkImage-class.html
+https://stackoverflow.com/questions/59793439/flutter-make-network-image-take-full-width
+https://stackoverflow.com/questions/43651708/how-do-i-pan-and-zoom-an-image
+https://stackoverflow.com/questions/56423707/flutter-zoomable-widget
+https://stackoverflow.com/questions/54846280/calling-setstate-during-build-without-user-interaction
+
+
+
+
+
+
+
+
 
 
 

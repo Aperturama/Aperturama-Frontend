@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:aperturama/routes/collection_settings.dart';
 import 'package:aperturama/routes/photo_settings.dart';
 import 'package:aperturama/routes/photos.dart';
@@ -24,22 +26,19 @@ class PhotoViewer extends StatefulWidget {
 }
 
 class _PhotoViewerState extends State<PhotoViewer> {
+  double _maxScale = 1;
+
   @override
   Widget build(BuildContext context) {
+    // Take in information about the current photo given as args
     final photo = ModalRoute.of(context)!.settings.arguments as PhotoDetails;
 
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
-          title: Text("Photo Viewer"),
+          title: Text("Photo Viewer " + _maxScale.toString()),
           centerTitle: true,
           actions: [
             IconButton(
@@ -60,44 +59,54 @@ class _PhotoViewerState extends State<PhotoViewer> {
           ],
         ),
         body: Center(
-          child: CachedNetworkImage(
-            imageUrl: photo.highresURL,
-            // Make the image fit the width
-            imageBuilder: (context, imageProvider) => Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.fitWidth,
-                ),
-              ),
-            ),
-            // Show the low res thumbnail while waiting for the high res to load
-            progressIndicatorBuilder: (context, url, downloadProgress) => Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                // Low-res thumbnail
-                CachedNetworkImage(
-                  imageUrl: photo.thumbnailURL,
-                  progressIndicatorBuilder: (context, url, downloadProgress) =>
-                      CircularProgressIndicator(
-                          value: downloadProgress.progress),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                  // Make the image fit the width
-                  imageBuilder: (context, imageProvider) => Container(
+            child: InteractiveViewer(
+              minScale: 1,
+              maxScale: _maxScale,
+              child: CachedNetworkImage(
+                imageUrl: photo.highresURL,
+                // Make the image fit the width
+                imageBuilder: (context, imageProvider) {
+                  WidgetsBinding.instance?.addPostFrameCallback((_) => setState(() {
+                        _maxScale = 16;
+                      }));
+                  return Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: imageProvider,
                         fit: BoxFit.fitWidth,
                       ),
                     ),
-                  ),
+                  );
+                },
+                // Show the low res thumbnail while waiting for the high res to load
+                progressIndicatorBuilder: (context, url, downloadProgress) => Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    // Low-res thumbnail
+                    CachedNetworkImage(
+                      imageUrl: photo.thumbnailURL,
+                      progressIndicatorBuilder: (context, url, downloadProgress) =>
+                          CircularProgressIndicator(
+                              value: downloadProgress.progress),
+                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                      // Make the image fit the width
+                      imageBuilder: (context, imageProvider) => Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Show the progress indicator on top of the low-res pic
+                    CircularProgressIndicator(value: downloadProgress.progress),
+                  ],
                 ),
-                // Show the progress indicator on top of the low-res pic
-                CircularProgressIndicator(value: downloadProgress.progress),
-              ],
-            ),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
-          ),
-        ));
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
+            )
+        )
+    );
   }
 }
