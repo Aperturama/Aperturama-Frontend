@@ -30,15 +30,22 @@ class _PhotoViewerState extends State<PhotoViewer> {
 
   @override
   Widget build(BuildContext context) {
-    // Take in information about the current photo given as args
-    final photo = ModalRoute.of(context)!.settings.arguments as PhotoDetails;
+    // Take in information about the current photo given as args,
+    // or set it to no photo if the args are invalid for some reason
+    final PhotoDetails photo;
+    if(ModalRoute.of(context)!.settings.arguments != null) {
+      photo = ModalRoute.of(context)!.settings.arguments as PhotoDetails;
+    } else {
+      photo = PhotoDetails("", "", "");
+      // Todo: Probably navigate back to the /photos page
+    }
 
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
-          title: Text("Photo Viewer " + _maxScale.toString()),
+          title: const Text("Photo Viewer"),
           centerTitle: true,
           actions: [
             IconButton(

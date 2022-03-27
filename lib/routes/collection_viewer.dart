@@ -50,8 +50,13 @@ class _CollectionViewerState extends State<CollectionViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as CollectionDetails;
+    final CollectionDetails collection;
+    if(ModalRoute.of(context)!.settings.arguments != null) {
+      collection = ModalRoute.of(context)!.settings.arguments as CollectionDetails;
+    } else {
+      collection = CollectionDetails("", "", "", false, []);
+      // Todo: Probably navigate back to the /collections page
+    }
 
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
@@ -63,7 +68,7 @@ class _CollectionViewerState extends State<CollectionViewer> {
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
-          title: Text(args.title),
+          title: Text(collection.name),
           centerTitle: true,
           actions: [
             IconButton(
