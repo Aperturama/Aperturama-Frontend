@@ -21,7 +21,7 @@ class Photos extends StatefulWidget {
 }
 
 class _PhotosState extends State<Photos> {
-  int _gridSize = 6; // TODO: Make this dependent on the screen size
+  int _gridSize = 4; // TODO: Make this dependent on the screen size
   final int _gridSizeMax = 8; // TODO: Make this dependent on the screen size
   // use MediaQuery.of(context).size.width(); for the screen size, but somewhere
   // that has context available
@@ -67,43 +67,6 @@ class _PhotosState extends State<Photos> {
     });
   }
 
-  Widget _createTappablePhotoIcon(BuildContext context, PhotoDetails photo) {
-    // Make a nice button that has the thumbnail inside it
-    return GestureDetector(
-      onTap: () =>
-          {Navigator.pushNamed(context, '/photo_viewer', arguments: photo)},
-      child: _createPhotoIcon(context, photo),
-    );
-  }
-
-  Widget _createPhotoIcon(BuildContext context, PhotoDetails photo) {
-    // Make a nice button that has the thumbnail inside it
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5.0),
-      ),
-      child: Center(child: CachedNetworkImage(
-          imageUrl: photo.thumbnailURL,
-          progressIndicatorBuilder: (context, url, downloadProgress) =>
-              SizedBox(width: 32, height: 32, child:
-              CircularProgressIndicator(value: downloadProgress.progress)
-              ),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-          imageBuilder: (context, imageProvider) {
-            return Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.fitWidth,
-                ),
-              ),
-            );
-          }),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -139,14 +102,7 @@ class _PhotosState extends State<Photos> {
           future: _getPhotosList(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: _gridSize),
-                itemBuilder: (BuildContext context, int index) {
-                  return _createTappablePhotoIcon(context, snapshot.data![index]);
-                },
-                itemCount: snapshot.data!.length,
-              );
+              return PhotoGrid(snapshot.data!, _gridSize);
             } else if (snapshot.hasError) {
               return const Text("Error");
             }
@@ -156,6 +112,71 @@ class _PhotosState extends State<Photos> {
         drawer: const MainDrawer());
   }
 }
+
+class PhotoGrid extends StatelessWidget {
+  const PhotoGrid(this.photos, this.gridSize, {Key? key}) : super(key: key);
+
+  final List<PhotoDetails> photos;
+  final int gridSize;
+
+  Widget _createTappablePhotoIcon(BuildContext context, PhotoDetails photo) {
+    // Make a nice button that has the thumbnail inside it
+    return GestureDetector(
+      onTap: () =>
+      {Navigator.pushNamed(context, '/photo_viewer', arguments: photo)},
+      child: PhotoIcon(photo),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: gridSize),
+      itemBuilder: (BuildContext context, int index) {
+        return _createTappablePhotoIcon(context, photos[index]);
+      },
+      itemCount: photos.length,
+    );
+  }
+}
+
+
+class PhotoIcon extends StatelessWidget {
+  const PhotoIcon(final this.photo, {Key? key}) : super(key: key);
+
+  final PhotoDetails photo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5.0),
+      ),
+      child: Center(child: CachedNetworkImage(
+          imageUrl: photo.thumbnailURL,
+          progressIndicatorBuilder: (context, url, downloadProgress) =>
+              SizedBox(width: 32, height: 32, child:
+              CircularProgressIndicator(value: downloadProgress.progress)
+              ),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
+          imageBuilder: (context, imageProvider) {
+            return Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+            );
+          }),
+      ),
+    );
+  }
+
+}
+
 
 class PhotoDetails {
   final String photoID;

@@ -2,6 +2,12 @@
 
 
 
+# Potential Future Improvements
+- Collection cards as a grid (not implemented due to issues with height being equal to width and being unable to fix that)
+- Global grid size (or one that gets saved/loaded to local storage and remembered across sessions)
+- Photo and collection IDs in the URL for reloaded pages to work properly
+
+
 # References Used:
 https://docs.flutter.dev/cookbook/lists/grid-lists
 https://api.flutter.dev/flutter/painting/BoxDecoration-class.html
