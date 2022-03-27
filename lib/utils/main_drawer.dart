@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class MainDrawer extends StatelessWidget {
   const MainDrawer({Key? key}) : super(key: key);
 
+  // TODO: Make this a sidebar on wider screens (probably done somewhere else)
+
   Widget stat(String t) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
