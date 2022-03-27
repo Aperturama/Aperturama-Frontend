@@ -21,87 +21,80 @@ class Photos extends StatefulWidget {
 }
 
 class _PhotosState extends State<Photos> {
-  int _gridSize = 4;
-  final int _gridSizeMax = 8;
+  int _gridSize = 6; // TODO: Make this dependent on the screen size
+  final int _gridSizeMax = 8; // TODO: Make this dependent on the screen size
+  // use MediaQuery.of(context).size.width(); for the screen size, but somewhere
+  // that has context available
+
+  // TODO: Enable swipe down to reload
 
   // Store the URLs for all the photos the app needs to download and cache
-  List<PhotoDetails> photos = [];
-  final int photoBufferAheadMin = 128;
-  final int photoBufferAheadStep = 512;
-
-  // Function to handle changing the size of the photo grid
-  void _changeGridSize(int amount) {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      if (amount < 0) {
-        if (_gridSize + amount <= 0) {
-          _gridSize = 1;
-        } else {
-          _gridSize += amount;
-        }
-      } else if (amount > 0) {
-        if (_gridSize + amount >= _gridSizeMax) {
-          _gridSize = _gridSizeMax;
-        } else {
-          _gridSize += amount;
-        }
-      }
-    });
-  }
-
-  void _requestPhotos() {
-    // HTTP request using photoBufferAheadStep to get that many more photo urls
+  Future<List<PhotoDetails>> _getPhotosList() async {
+    List<PhotoDetails> photos = [];
 
     // For now, make up urls
-    for(int i = 0; i < photoBufferAheadStep; i++) {
-      photos.add(PhotoDetails(photos.length.toString(),
-          'https://picsum.photos/seed/' + photos.length.toString() + '/256',
-          'https://picsum.photos/seed/' + photos.length.toString() + '/4096',
+    for (int i = 0; i < 512; i++) {
+      photos.add(PhotoDetails(
+        photos.length.toString(),
+        'https://picsum.photos/seed/' + photos.length.toString() + '/256',
+        'https://picsum.photos/seed/' + photos.length.toString() + '/4096',
       ));
     }
 
+    // TODO: Save and load from disk if network is unavailable
+
+    return photos;
   }
 
-  Widget _createPhotoIcon(BuildContext context, int index) {
-
-    // Quick, get some more photos!
-    if(index + photoBufferAheadMin > photos.length) {
-      _requestPhotos();
+  // Function to handle changing the size of the photo grid
+  void _changeGridSize(int amount) {
+    // Make sure the grid size can't go below 1 or above the max size
+    if (amount < 0) {
+      if (_gridSize + amount <= 0) {
+        _gridSize = 1;
+      } else {
+        _gridSize += amount;
+      }
+    } else if (amount > 0) {
+      if (_gridSize + amount >= _gridSizeMax) {
+        _gridSize = _gridSizeMax;
+      } else {
+        _gridSize += amount;
+      }
     }
+    setState(() {
+      _gridSize;
+    });
+  }
 
+  Widget _createPhotoIcon(BuildContext context, PhotoDetails photo) {
+    // Make a nice button that has the thumbnail inside it
     return GestureDetector(
-      onTap: () => {
-        Navigator.pushNamed(context, '/photo_viewer',
-          arguments: photos[index]
-        )
-      },
-      child: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Card(
-                clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                child: CachedNetworkImage(
-                  imageUrl: photos[index].thumbnailURL,
-                  progressIndicatorBuilder:
-                      (context, url, downloadProgress) =>
-                      CircularProgressIndicator(
-                          value: downloadProgress.progress),
-                  errorWidget: (context, url, error) =>
-                  const Icon(Icons.error),
-                ),
-              ),
-            ),
-          ],
+      onTap: () =>
+          {Navigator.pushNamed(context, '/photo_viewer', arguments: photo)},
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
         ),
+        child: Center(child: CachedNetworkImage(
+            imageUrl: photo.thumbnailURL,
+            progressIndicatorBuilder: (context, url, downloadProgress) =>
+              SizedBox(width: 32, height: 32, child:
+                CircularProgressIndicator(value: downloadProgress.progress)
+              ),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
+            imageBuilder: (context, imageProvider) {
+              return Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.fitWidth,
+                  ),
+                ),
+              );
+            }),
+      ),
       ),
     );
   }
@@ -137,20 +130,30 @@ class _PhotosState extends State<Photos> {
             ),
           ],
         ),
-        body: GridView.builder(
-          // Create a grid with 2 columns. If you change the scrollDirection to
-          // horizontal, this produces 2 rows.
-          //crossAxisCount: _gridSize,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: _gridSize),
-          itemBuilder: (BuildContext context, int index) {
-            return _createPhotoIcon(context, index);
+        body: FutureBuilder<List<PhotoDetails>>(
+          future: _getPhotosList(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return GridView.builder(
+                // Create a grid with 2 columns. If you change the scrollDirection to
+                // horizontal, this produces 2 rows.
+                //crossAxisCount: _gridSize,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: _gridSize),
+                itemBuilder: (BuildContext context, int index) {
+                  return _createPhotoIcon(context, snapshot.data![index]);
+                },
+                itemCount: snapshot.data!.length,
+              );
+            } else if (snapshot.hasError) {
+              return const Text("Error");
+            }
+            return const Text("Loading...");
           },
         ),
-        
         drawer: const MainDrawer());
   }
 }
-
 
 class PhotoDetails {
   final String photoID;
