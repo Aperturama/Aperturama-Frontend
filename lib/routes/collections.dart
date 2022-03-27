@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:aperturama/routes/photos.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -21,6 +24,105 @@ class Collections extends StatefulWidget {
 
 class _CollectionsState extends State<Collections> {
 
+  int _gridSize = 2;
+
+  // Store the URLs for all the photos the app needs to download and cache
+  Future<List<CollectionDetails>> _getCollectionsList() async {
+    List<CollectionDetails> collections = [];
+
+    // For now, make up some collections
+    var rng = Random();
+    int numCollections = 20;
+
+    for (int i = 0; i < numCollections; i++) {
+
+      int photos = rng.nextInt(100) + 10;
+      int videos = rng.nextInt(100) + 10;
+
+      List<PhotoDetails> p = [];
+      for (int k = 1; k <= 8; k++) {
+        p.add(PhotoDetails(k.toString(),
+          'https://picsum.photos/seed/' + (i * numCollections + k).toString() + '/256',
+          'https://picsum.photos/seed/' + (i * numCollections + k).toString() + '/4096'
+          )
+        );
+      }
+
+      collections.add(CollectionDetails(
+          "Collection " + (i+1).toString(),
+          photos.toString() + " Photos, " + videos.toString() + " Videos",
+          "random url",
+          rng.nextInt(2) == 0 ? false : true,
+          p
+        )
+      );
+    }
+
+    // TODO: Save and load from disk if network is unavailable
+
+    return collections;
+  }
+
+  Widget _createCollectionCard(BuildContext context, CollectionDetails collection) {
+    return GestureDetector(
+      onTap: () => {
+        Navigator.pushNamed(context, '/collection_viewer',
+          arguments: collection,
+        )
+      },
+      child: Card(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GridView.count(
+              shrinkWrap: true,
+              crossAxisCount: 4,
+              children: List.generate(4, (index) {
+                return Card(
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: Center(child: CachedNetworkImage(
+                      imageUrl: collection.previewImages[index].thumbnailURL,
+                      progressIndicatorBuilder: (context, url, downloadProgress) =>
+                          SizedBox(width: 32, height: 32, child:
+                          CircularProgressIndicator(value: downloadProgress.progress)
+                          ),
+                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                      imageBuilder: (context, imageProvider) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.fitWidth,
+                            ),
+                          ),
+                        );
+                      }),
+                  ),
+                );
+              }),
+            ),
+            ListTile(
+              horizontalTitleGap: 0,
+              title: ListTile(
+                title: Transform(
+                  transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
+                  child: Text(collection.name),
+                ),
+                trailing: Text(collection.shared ? "Shared" : "Not Shared"),
+              ),
+              subtitle: Text(collection.information),
+              contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -36,146 +138,22 @@ class _CollectionsState extends State<Collections> {
           title: const Text("Collections"),
           centerTitle: true,
         ),
-        body: Column(
-          children: [
-            GestureDetector(
-              onTap: () => {
-                Navigator.pushNamed(context, '/collection_viewer',
-                  arguments: CollectionDetails(
-                    'Collection 1',
-                    '42 Photos, 0 Videos',
-                  ),
-                )
-              },
-              child: Card(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    GridView.count(
-                      shrinkWrap: true,
-                      crossAxisCount: 4,
-                      children: List.generate(4, (index) {
-                        return Center(
-                          child: Card(
-                            clipBehavior: Clip.antiAlias,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            child: CachedNetworkImage(
-                              imageUrl: 'https://picsum.photos/250?random=' +
-                                  index.toString(),
-                              progressIndicatorBuilder:
-                                  (context, url, downloadProgress) =>
-                                  CircularProgressIndicator(
-                                      value: downloadProgress.progress),
-                              errorWidget: (context, url, error) =>
-                              const Icon(Icons.error),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                    ListTile(
-                      horizontalTitleGap: 0,
-                      title: ListTile(
-                        title: Transform(
-                          transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
-                          child: Text('Collection 1'),
-                        ),
-                        trailing: Text('Shared'),
-                      ),
-                      subtitle: Text('42 Photos, 0 Videos'),
-                      contentPadding: EdgeInsets.only(left: 14, bottom: 10),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Card(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GridView.count(
-                    shrinkWrap: true,
-                    crossAxisCount: 4,
-                    children: List.generate(4, (index) {
-                      return Center(
-                        child: Card(
-                          clipBehavior: Clip.antiAlias,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          child: CachedNetworkImage(
-                            imageUrl: 'https://picsum.photos/250?random=' +
-                                index.toString() * 2,
-                            progressIndicatorBuilder:
-                                (context, url, downloadProgress) =>
-                                CircularProgressIndicator(
-                                    value: downloadProgress.progress),
-                            errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                  ListTile(
-                    horizontalTitleGap: 0,
-                    title: ListTile(
-                      title: Transform(
-                        transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
-                        child: Text('Collection 2'),
-                      ),
-                    ),
-                    subtitle: Text('6 Photos, 9 Videos'),
-                    contentPadding: EdgeInsets.only(left: 14, bottom: 10),
-                  ),
-                ],
-              ),
-            ),
-            Card(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GridView.count(
-                    shrinkWrap: true,
-                    crossAxisCount: 4,
-                    children: List.generate(4, (index) {
-                      return Center(
-                        child: Card(
-                          clipBehavior: Clip.antiAlias,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          child: CachedNetworkImage(
-                            imageUrl: 'https://picsum.photos/250?random=' +
-                                index.toString() * 3,
-                            progressIndicatorBuilder:
-                                (context, url, downloadProgress) =>
-                                CircularProgressIndicator(
-                                    value: downloadProgress.progress),
-                            errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                  ListTile(
-                    horizontalTitleGap: 0,
-                    title: ListTile(
-                      title: Transform(
-                        transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
-                        child: Text('Collection 3'),
-                      ),
-                    ),
-                    subtitle: Text('5 Photos, 6 Videos'),
-                    contentPadding: EdgeInsets.only(left: 14, bottom: 10),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        body: FutureBuilder<List<CollectionDetails>>(
+          future: _getCollectionsList(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int index) {
+                    return _createCollectionCard(context, snapshot.data![index]);
+                  },
+                  itemCount: snapshot.data!.length,
+              );
+            } else if (snapshot.hasError) {
+              return const Text("Error");
+            }
+            return const Text("Loading...");
+          },
         ),
         drawer: const MainDrawer());
   }
@@ -183,8 +161,13 @@ class _CollectionsState extends State<Collections> {
 
 
 class CollectionDetails {
-  final String title;
-  final String message;
+  final String name;
+  final String information;
+  final String url;
+  final bool shared;
+  final List<PhotoDetails> previewImages;
 
-  CollectionDetails(this.title, this.message);
+  CollectionDetails(
+      this.name, this.information, this.url, this.shared, this.previewImages
+  );
 }
