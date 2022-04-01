@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:aperturama/utils/main_drawer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -21,8 +22,8 @@ class Photos extends StatefulWidget {
 }
 
 class _PhotosState extends State<Photos> {
-  int _gridSize = 4;
-  final int _gridSizeMax = 8;
+  int _gridSize = kIsWeb ? 12 : 4;
+  final int _gridSizeMax = kIsWeb ? 20 : 8;
 
   // Store the URLs for all the photos the app needs to download and cache
   List<PhotoDetails> photos = [];
@@ -37,6 +38,11 @@ class _PhotosState extends State<Photos> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
+
+      if(_gridSize > 10) {
+        amount *= kIsWeb ? 2 : 1;
+      }
+
       if (amount < 0) {
         if (_gridSize + amount <= 0) {
           _gridSize = 1;
@@ -147,7 +153,7 @@ class _PhotosState extends State<Photos> {
           },
         ),
         
-        drawer: const MainDrawer());
+        drawer: kIsWeb ? null : const MainDrawer());
   }
 }
 
