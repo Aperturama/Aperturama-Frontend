@@ -1,13 +1,8 @@
-import 'dart:async';
-
-import 'package:aperturama/routes/collection_settings.dart';
 import 'package:aperturama/routes/photo_settings.dart';
 import 'package:aperturama/routes/photos.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../utils/main_drawer.dart';
-import 'collections.dart';
 
 class PhotoViewer extends StatefulWidget {
   const PhotoViewer({Key? key}) : super(key: key);

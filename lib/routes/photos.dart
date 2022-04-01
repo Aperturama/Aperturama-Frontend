@@ -51,7 +51,7 @@ class _PhotosState extends State<Photos> {
   void _changeGridSize(int amount) {
     // Make sure the grid size can't go below 1 or above the max size
 
-    if(_gridSize > 10) {
+    if (_gridSize > 10) {
       amount *= kIsWeb ? 2 : 1;
     }
 
@@ -84,7 +84,7 @@ class _PhotosState extends State<Photos> {
 
     // Set up the initial grid sizing
     // TODO: This doesn't reload when a web browser's size is changed, should probably be fixed
-    if(_gridSize == 0 && _gridSizeMax == 0) {
+    if (_gridSize == 0 && _gridSizeMax == 0) {
       double width = MediaQuery.of(context).size.width;
       _gridSize = max(4, (width / 200.0).round());
       _gridSizeMax = max(8, (width / 100.0).round());
@@ -114,18 +114,24 @@ class _PhotosState extends State<Photos> {
             ),
           ],
         ),
-        body: FutureBuilder<List<PhotoDetails>>(
-          future: _getPhotosList(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return PhotoGrid(snapshot.data!, _gridSize);
-            } else if (snapshot.hasError) {
-              return const Text("Error");
-            }
-            return const Text("Loading...");
-          },
-        ),
-        
+        body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            child: kIsWeb ? const MainDrawer() : null,
+          ),
+          Expanded(
+            child: FutureBuilder<List<PhotoDetails>>(
+              future: _getPhotosList(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return PhotoGrid(snapshot.data!, _gridSize);
+                } else if (snapshot.hasError) {
+                  return const Text("Error");
+                }
+                return const Text("Loading...");
+              },
+            ),
+          ),
+        ]),
         drawer: kIsWeb ? null : const MainDrawer());
   }
 }
@@ -140,7 +146,7 @@ class PhotoGrid extends StatelessWidget {
     // Make a nice button that has the thumbnail inside it
     return GestureDetector(
       onTap: () =>
-      {Navigator.pushNamed(context, '/photo_viewer', arguments: photo)},
+          {Navigator.pushNamed(context, '/photo_viewer', arguments: photo)},
       child: PhotoIcon(photo),
     );
   }
@@ -148,8 +154,8 @@ class PhotoGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: gridSize),
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: gridSize),
       itemBuilder: (BuildContext context, int index) {
         return _createTappablePhotoIcon(context, photos[index]);
       },
@@ -157,7 +163,6 @@ class PhotoGrid extends StatelessWidget {
     );
   }
 }
-
 
 class PhotoIcon extends StatelessWidget {
   const PhotoIcon(final this.photo, {Key? key}) : super(key: key);
@@ -171,29 +176,30 @@ class PhotoIcon extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(5.0),
       ),
-      child: Center(child: CachedNetworkImage(
-          imageUrl: photo.thumbnailURL,
-          progressIndicatorBuilder: (context, url, downloadProgress) =>
-              SizedBox(width: 32, height: 32, child:
-              CircularProgressIndicator(value: downloadProgress.progress)
-              ),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-          imageBuilder: (context, imageProvider) {
-            return Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.fitWidth,
+      child: Center(
+        child: CachedNetworkImage(
+            imageUrl: photo.thumbnailURL,
+            progressIndicatorBuilder: (context, url, downloadProgress) =>
+                SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: CircularProgressIndicator(
+                        value: downloadProgress.progress)),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
+            imageBuilder: (context, imageProvider) {
+              return Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.fitWidth,
+                  ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
       ),
     );
   }
-
 }
-
 
 class PhotoDetails {
   final String photoID;

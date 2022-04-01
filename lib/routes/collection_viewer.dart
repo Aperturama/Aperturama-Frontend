@@ -5,7 +5,6 @@ import 'package:aperturama/routes/photos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
-import '../utils/main_drawer.dart';
 import 'collections.dart';
 
 class CollectionViewer extends StatefulWidget {

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:aperturama/routes/photos.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -14,7 +15,6 @@ class Collections extends StatefulWidget {
 }
 
 class _CollectionsState extends State<Collections> {
-
   // Store the URLs for all the photos the app needs to download and cache
   Future<List<CollectionDetails>> _getCollectionsList() async {
     List<CollectionDetails> collections = [];
@@ -24,27 +24,30 @@ class _CollectionsState extends State<Collections> {
     int numCollections = 20;
 
     for (int i = 0; i < numCollections; i++) {
-
       int photoCount = rng.nextInt(100) + 10;
       int videoCount = rng.nextInt(100) + 10;
 
       List<PhotoDetails> p = [];
       for (int k = 1; k <= photoCount; k++) {
-        p.add(PhotoDetails(k.toString(),
-          'https://picsum.photos/seed/' + (i * numCollections + k).toString() + '/256',
-          'https://picsum.photos/seed/' + (i * numCollections + k).toString() + '/4096'
-          )
-        );
+        p.add(PhotoDetails(
+            k.toString(),
+            'https://picsum.photos/seed/' +
+                (i * numCollections + k).toString() +
+                '/256',
+            'https://picsum.photos/seed/' +
+                (i * numCollections + k).toString() +
+                '/4096'));
       }
 
       collections.add(CollectionDetails(
-          "Collection " + (i+1).toString(),
-          photoCount.toString() + " Photos, " + videoCount.toString() + " Videos",
+          "Collection " + (i + 1).toString(),
+          photoCount.toString() +
+              " Photos, " +
+              videoCount.toString() +
+              " Videos",
           "random url",
           rng.nextInt(2) == 0 ? false : true,
-          p
-        )
-      );
+          p));
     }
 
     // TODO: Save and load from disk if network is unavailable
@@ -52,10 +55,13 @@ class _CollectionsState extends State<Collections> {
     return collections;
   }
 
-  Widget _createCollectionCard(BuildContext context, CollectionDetails collection) {
+  Widget _createCollectionCard(
+      BuildContext context, CollectionDetails collection) {
     return GestureDetector(
       onTap: () => {
-        Navigator.pushNamed(context, '/collection_viewer',
+        Navigator.pushNamed(
+          context,
+          '/collection_viewer',
           arguments: collection,
         )
       },
@@ -74,7 +80,8 @@ class _CollectionsState extends State<Collections> {
               horizontalTitleGap: 0,
               title: ListTile(
                 title: Transform(
-                  transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
+                  transform: Matrix4.translationValues(
+                      -16, 0.0, 0.0), // Fix the indention issue
                   child: Text(collection.name),
                 ),
                 trailing: Text(collection.shared ? "Shared" : "Not Shared"),
@@ -87,7 +94,6 @@ class _CollectionsState extends State<Collections> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -104,27 +110,34 @@ class _CollectionsState extends State<Collections> {
           title: const Text("Collections"),
           centerTitle: true,
         ),
-        body: FutureBuilder<List<CollectionDetails>>(
-          future: _getCollectionsList(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView.builder(
-                shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _createCollectionCard(context, snapshot.data![index]);
-                  },
-                  itemCount: snapshot.data!.length,
-              );
-            } else if (snapshot.hasError) {
-              return const Text("Error");
-            }
-            return const Text("Loading...");
-          },
-        ),
-        drawer: const MainDrawer());
+        body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            child: kIsWeb ? const MainDrawer() : null,
+          ),
+          Expanded(
+            child: FutureBuilder<List<CollectionDetails>>(
+              future: _getCollectionsList(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemBuilder: (BuildContext context, int index) {
+                      return _createCollectionCard(
+                          context, snapshot.data![index]);
+                    },
+                    itemCount: snapshot.data!.length,
+                  );
+                } else if (snapshot.hasError) {
+                  return const Text("Error");
+                }
+                return const Text("Loading...");
+              },
+            ),
+          ),
+        ]),
+        drawer: kIsWeb ? null : const MainDrawer());
   }
 }
-
 
 class CollectionDetails {
   final String name;
@@ -132,10 +145,9 @@ class CollectionDetails {
   final String url;
   final bool shared;
   final List<PhotoDetails> images; // may also be previewImages and the rest
-                                   // gathered in collection_viewer, which is
-                                   // probably better. new field needed though
+  // gathered in collection_viewer, which is
+  // probably better. new field needed though
 
   CollectionDetails(
-      this.name, this.information, this.url, this.shared, this.images
-  );
+      this.name, this.information, this.url, this.shared, this.images);
 }
