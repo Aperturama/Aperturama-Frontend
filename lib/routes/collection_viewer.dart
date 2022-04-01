@@ -1,4 +1,5 @@
 import 'package:aperturama/routes/collection_settings.dart';
+import 'package:aperturama/routes/photos.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -25,33 +26,36 @@ class _CollectionViewerState extends State<CollectionViewer> {
   int _gridSize = 4;
   final int _gridSizeMax = 8;
 
+  // Function to handle changing the size of the photo grid
   void _changeGridSize(int amount) {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      if (amount < 0) {
-        if (_gridSize + amount <= 0) {
-          _gridSize = 1;
-        } else {
-          _gridSize += amount;
-        }
-      } else if (amount > 0) {
-        if (_gridSize + amount >= _gridSizeMax) {
-          _gridSize = _gridSizeMax;
-        } else {
-          _gridSize += amount;
-        }
+    // Make sure the grid size can't go below 1 or above the max size
+    if (amount < 0) {
+      if (_gridSize + amount <= 0) {
+        _gridSize = 1;
+      } else {
+        _gridSize += amount;
       }
+    } else if (amount > 0) {
+      if (_gridSize + amount >= _gridSizeMax) {
+        _gridSize = _gridSizeMax;
+      } else {
+        _gridSize += amount;
+      }
+    }
+    setState(() {
+      _gridSize;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as CollectionDetails;
+    final CollectionDetails collection;
+    if(ModalRoute.of(context)!.settings.arguments != null) {
+      collection = ModalRoute.of(context)!.settings.arguments as CollectionDetails;
+    } else {
+      collection = CollectionDetails("", "", "", false, []);
+      // Todo: Probably navigate back to the /collections page
+    }
 
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
@@ -63,7 +67,7 @@ class _CollectionViewerState extends State<CollectionViewer> {
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
-          title: Text(args.title),
+          title: Text(collection.name),
           centerTitle: true,
           actions: [
             IconButton(
@@ -90,60 +94,27 @@ class _CollectionViewerState extends State<CollectionViewer> {
               title: ListTile(
                 title: Transform(
                   transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
-                  child: Text('Shared'),
+                  child: Text(collection.shared ? "Shared" : "Not Shared"),
                 ),
                 trailing: TextButton(
-                  child: const Text('Sharing Settings'),
+                  child: const Text('Settings'),
                   onPressed: () {
                     Navigator.push(
                       context,
                       PageRouteBuilder(
                         barrierDismissible: true,
                         opaque: false,
-                        pageBuilder: (_, anim1, anim2) => CollectionSettings(title: "potato"),
+                        pageBuilder: (_, anim1, anim2) => CollectionSettings(collection),
                       ),
                     );
                   },
                 ),
               ),
-              subtitle: Text('42 Photos, 0 Videos'),
+              subtitle: Text(collection.information),
               contentPadding: EdgeInsets.only(left: 14, bottom: 10),
             ),
             Expanded(
-              child: GridView.count(
-                shrinkWrap: true,
-                // Create a grid with 2 columns. If you change the scrollDirection to
-                // horizontal, this produces 2 rows.
-                crossAxisCount: _gridSize,
-                // Generate 100 widgets that display their index in the List.
-                children: List.generate(400, (index) {
-                  return Center(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Card(
-                            clipBehavior: Clip.antiAlias,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            child: CachedNetworkImage(
-                              imageUrl: 'https://picsum.photos/250?random=' +
-                                  index.toString(),
-                              progressIndicatorBuilder:
-                                  (context, url, downloadProgress) =>
-                                      CircularProgressIndicator(
-                                          value: downloadProgress.progress),
-                              errorWidget: (context, url, error) =>
-                                  const Icon(Icons.error),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-              ),
+              child: PhotoGrid(collection.images, _gridSize),
             ),
           ],
         ));

@@ -2,6 +2,12 @@
 
 
 
+# Potential Future Improvements
+- Collection cards as a grid (not implemented due to issues with height being equal to width and being unable to fix that)
+- Global grid size (or one that gets saved/loaded to local storage and remembered across sessions)
+- Photo and collection IDs in the URL for reloaded pages to work properly
+
+
 # References Used:
 https://docs.flutter.dev/cookbook/lists/grid-lists
 https://api.flutter.dev/flutter/painting/BoxDecoration-class.html
@@ -59,17 +65,18 @@ https://stackoverflow.com/questions/59793439/flutter-make-network-image-take-ful
 https://stackoverflow.com/questions/43651708/how-do-i-pan-and-zoom-an-image
 https://stackoverflow.com/questions/56423707/flutter-zoomable-widget
 https://stackoverflow.com/questions/54846280/calling-setstate-during-build-without-user-interaction
-
-
-
-
-
-
-
-
-
-
-
+https://www.kindacode.com/article/set-default-parameter-values-for-a-function-in-flutter/
+https://flutter-examples.com/add-padding-to-text-widget/
+https://api.flutter.dev/flutter/widgets/ListView-class.html
+https://stackoverflow.com/questions/67870088/how-to-dynamically-generate-a-grid-view-in-flutter
+https://stackoverflow.com/questions/59587409/how-to-put-json-data-from-server-with-gridview-flutter
+https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html
+https://api.flutter.dev/flutter/dart-async/Future/Future.delayed.html
+https://stackoverflow.com/questions/51983011/when-should-i-use-a-futurebuilder
+https://stackoverflow.com/questions/51901379/how-to-set-size-to-circularprogressindicator
+https://stackoverflow.com/questions/11674820/how-do-i-generate-random-numbers-in-dart
+https://stackoverflow.com/questions/48405123/how-to-set-custom-height-for-widget-in-gridview-in-flutter
+https://stackoverflow.com/questions/69208509/gridview-count-vs-gridview-builder-difference-in-flutter
 
 
 

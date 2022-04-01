@@ -4,18 +4,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'collections.dart';
 
 class CollectionSettings extends StatefulWidget {
-  const CollectionSettings({Key? key, required this.title}) : super(key: key);
+  const CollectionSettings(this.collection, {Key? key}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  final CollectionDetails collection;
 
   @override
   State<CollectionSettings> createState() => _CollectionSettingsState();
@@ -56,9 +47,7 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        ListTile(
-                          title: Text("Collection Name:"),
-                        ),
+                        Text("Collection Name:"),
                         TextFormField(
                           decoration: const InputDecoration(
                             filled: true,

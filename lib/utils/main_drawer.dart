@@ -3,13 +3,33 @@ import 'package:flutter/material.dart';
 class MainDrawer extends StatelessWidget {
   const MainDrawer({Key? key}) : super(key: key);
 
+  // TODO: Make this a sidebar on wider screens (probably done somewhere else)
+
+  Widget stat(String t) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
+      child: Text(t,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
+  Widget statPad() {
+    return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 0)
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Expanded(
+            Flexible( // Menu options at the top of the screen
               child: ListView(
                 children: [
                   ListTile(
@@ -51,57 +71,19 @@ class MainDrawer extends StatelessWidget {
                 ],
               ),
             ),
-            Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: const [
-                    ListTile(
-                      dense: true,
-                      title: Text(
-                        'Logged in as Hunter',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    ListTile(
-                      dense: true,
-                      title: Text(
-                        '1268 Photos',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    ListTile(
-                      dense: true,
-                      title: Text(
-                        '72 Videos',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    ListTile(
-                      dense: true,
-                      title: Text(
-                        '13 Collections',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    ListTile(
-                      dense: true,
-                      title: Text(
-                        '6 Shared Items',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    ListTile(
-                      dense: true,
-                      title: Text(
-                        '30GB / 2TB Used',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            const Divider(height: 1.0),
+            ListView( // Stats at the bottom of the screen
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              children: [
+                statPad(),
+                stat('Logged in as Hunter'),
+                stat('1268 Photos'),
+                stat('13 Collections'),
+                stat('6 Shared Items'),
+                stat('30GB / 2TB Used'),
+                statPad(),
+              ],
             ),
           ],
         ));
