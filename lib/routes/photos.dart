@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:aperturama/utils/main_drawer.dart';
@@ -22,10 +24,8 @@ class Photos extends StatefulWidget {
 }
 
 class _PhotosState extends State<Photos> {
-  int _gridSize = 4; // TODO: Make this dependent on the screen size
-  final int _gridSizeMax = 8; // TODO: Make this dependent on the screen size
-  // use MediaQuery.of(context).size.width(); for the screen size, but somewhere
-  // that has context available
+  int _gridSize = 0; // Start at 0 and set during the first build
+  int _gridSizeMax = 0; // Start at 0 and set during the first build
 
   // TODO: Enable swipe down to reload
 
@@ -81,6 +81,16 @@ class _PhotosState extends State<Photos> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
+    // Set up the initial grid sizing
+    // TODO: This doesn't reload when a web browser's size is changed, should probably be fixed
+    if(_gridSize == 0 && _gridSizeMax == 0) {
+      double width = MediaQuery.of(context).size.width;
+      _gridSize = max(4, (width / 200.0).round());
+      _gridSizeMax = max(8, (width / 100.0).round());
+      debugPrint('$width $_gridSize $_gridSizeMax');
+    }
+
     return Scaffold(
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
