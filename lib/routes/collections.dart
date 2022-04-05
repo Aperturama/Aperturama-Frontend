@@ -15,6 +15,7 @@ class Collections extends StatefulWidget {
 }
 
 class _CollectionsState extends State<Collections> {
+
   // Store the URLs for all the photos the app needs to download and cache
   Future<List<CollectionDetails>> _getCollectionsList() async {
     List<CollectionDetails> collections = [];
@@ -54,6 +55,48 @@ class _CollectionsState extends State<Collections> {
 
     return collections;
   }
+
+  @override
+  Widget build(BuildContext context) {
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
+    return Scaffold(
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: const Text("Collections"),
+          centerTitle: true,
+        ),
+        body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            child: kIsWeb ? const MainDrawer() : null,
+          ),
+          Expanded(
+            child: FutureBuilder<List<CollectionDetails>>(
+              future: _getCollectionsList(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return CollectionList(snapshot.data!);
+                } else if (snapshot.hasError) {
+                  return const Text("Error");
+                }
+                return const Text("Loading...");
+              },
+            ),
+          ),
+        ]),
+        drawer: kIsWeb ? null : const MainDrawer());
+  }
+}
+
+class CollectionList extends StatelessWidget {
+  const CollectionList(this.collections, {Key? key}) : super(key: key);
+
+  final List<CollectionDetails> collections;
 
   Widget _createCollectionCard(
       BuildContext context, CollectionDetails collection) {
@@ -97,47 +140,21 @@ class _CollectionsState extends State<Collections> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: const Text("Collections"),
-          centerTitle: true,
-        ),
-        body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            child: kIsWeb ? const MainDrawer() : null,
-          ),
-          Expanded(
-            child: FutureBuilder<List<CollectionDetails>>(
-              future: _getCollectionsList(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemBuilder: (BuildContext context, int index) {
-                      return _createCollectionCard(
-                          context, snapshot.data![index]);
-                    },
-                    itemCount: snapshot.data!.length,
-                  );
-                } else if (snapshot.hasError) {
-                  return const Text("Error");
-                }
-                return const Text("Loading...");
-              },
-            ),
-          ),
-        ]),
-        drawer: kIsWeb ? null : const MainDrawer());
+    return ListView.builder(
+      shrinkWrap: true,
+      // This is needed for the shared media page
+      // so that it doesn't scroll within the larger scrollable list
+      physics: const ClampingScrollPhysics(),
+      itemBuilder: (BuildContext context, int index) {
+        return _createCollectionCard(
+            context, collections[index]);
+      },
+      itemCount: collections.length,
+    );
   }
+
 }
+
 
 class CollectionDetails {
   final String name;
