@@ -169,7 +169,7 @@ class _SharedState extends State<Shared> {
                      PhotoGrid(snapshot.data!.photos, _gridSize),
                     ],
                   ),
-                ); //PhotoGrid(snapshot.data!, _gridSize);
+                );
               } else if (snapshot.hasError) {
                 return const Text("Error");
               }
