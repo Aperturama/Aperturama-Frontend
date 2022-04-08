@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
         '/collection_viewer': (context) => const CollectionViewer(),
         '/shared': (context) => const Shared(),
         '/auto_upload': (context) => const AutoUpload(),
-        '/settings': (context) => const Settings(),
+        '/settings': (context) => const AppSettings(),
       },
     );
   }
