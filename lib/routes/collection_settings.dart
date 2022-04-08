@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
-import 'collections.dart';
+import 'package:aperturama/utils/media.dart';
 
 class CollectionSettings extends StatefulWidget {
   const CollectionSettings(this.collection, {Key? key}) : super(key: key);
 
-  final CollectionDetails collection;
+  final Collection collection;
 
   @override
   State<CollectionSettings> createState() => _CollectionSettingsState();

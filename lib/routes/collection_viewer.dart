@@ -4,8 +4,7 @@ import 'package:aperturama/routes/collection_settings.dart';
 import 'package:aperturama/routes/photos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-
-import 'collections.dart';
+import 'package:aperturama/utils/media.dart';
 
 class CollectionViewer extends StatefulWidget {
   const CollectionViewer({Key? key}) : super(key: key);
@@ -46,11 +45,11 @@ class _CollectionViewerState extends State<CollectionViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final CollectionDetails collection;
+    final Collection collection;
     if(ModalRoute.of(context)!.settings.arguments != null) {
-      collection = ModalRoute.of(context)!.settings.arguments as CollectionDetails;
+      collection = ModalRoute.of(context)!.settings.arguments as Collection;
     } else {
-      collection = CollectionDetails("", "", "", false, []);
+      collection = Collection("", "", "", false, []);
       // Todo: Probably navigate back to the /collections page
     }
 

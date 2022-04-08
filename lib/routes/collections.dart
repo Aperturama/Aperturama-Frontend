@@ -4,6 +4,7 @@ import 'package:aperturama/routes/photos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:aperturama/utils/media.dart';
 
 import '../utils/main_drawer.dart';
 
@@ -17,8 +18,8 @@ class Collections extends StatefulWidget {
 class _CollectionsState extends State<Collections> {
 
   // Store the URLs for all the photos the app needs to download and cache
-  Future<List<CollectionDetails>> _getCollectionsList() async {
-    List<CollectionDetails> collections = [];
+  Future<List<Collection>> _getCollectionsList() async {
+    List<Collection> collections = [];
 
     // For now, make up some collections
     var rng = Random();
@@ -28,9 +29,9 @@ class _CollectionsState extends State<Collections> {
       int photoCount = rng.nextInt(100) + 10;
       int videoCount = rng.nextInt(100) + 10;
 
-      List<PhotoDetails> p = [];
+      List<Photo> p = [];
       for (int k = 1; k <= photoCount; k++) {
-        p.add(PhotoDetails(
+        p.add(Photo(
             k.toString(),
             'https://picsum.photos/seed/' +
                 (i * numCollections + k).toString() +
@@ -40,7 +41,7 @@ class _CollectionsState extends State<Collections> {
                 '/4096'));
       }
 
-      collections.add(CollectionDetails(
+      collections.add(Collection(
           "Collection " + (i + 1).toString(),
           photoCount.toString() +
               " Photos, " +
@@ -76,7 +77,7 @@ class _CollectionsState extends State<Collections> {
             child: kIsWeb ? const MainDrawer() : null,
           ),
           Expanded(
-            child: FutureBuilder<List<CollectionDetails>>(
+            child: FutureBuilder<List<Collection>>(
               future: _getCollectionsList(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -96,10 +97,10 @@ class _CollectionsState extends State<Collections> {
 class CollectionList extends StatelessWidget {
   const CollectionList(this.collections, {Key? key}) : super(key: key);
 
-  final List<CollectionDetails> collections;
+  final List<Collection> collections;
 
   Widget _createCollectionCard(
-      BuildContext context, CollectionDetails collection) {
+      BuildContext context, Collection collection) {
     return GestureDetector(
       onTap: () => {
         Navigator.pushNamed(
@@ -156,15 +157,3 @@ class CollectionList extends StatelessWidget {
 }
 
 
-class CollectionDetails {
-  final String name;
-  final String information;
-  final String url;
-  final bool shared;
-  final List<PhotoDetails> images; // may also be previewImages and the rest
-  // gathered in collection_viewer, which is
-  // probably better. new field needed though
-
-  CollectionDetails(
-      this.name, this.information, this.url, this.shared, this.images);
-}

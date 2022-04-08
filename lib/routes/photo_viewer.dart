@@ -1,5 +1,5 @@
 import 'package:aperturama/routes/photo_settings.dart';
-import 'package:aperturama/routes/photos.dart';
+import 'package:aperturama/utils/media.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -27,11 +27,11 @@ class _PhotoViewerState extends State<PhotoViewer> {
   Widget build(BuildContext context) {
     // Take in information about the current photo given as args,
     // or set it to no photo if the args are invalid for some reason
-    final PhotoDetails photo;
+    final Photo photo;
     if(ModalRoute.of(context)!.settings.arguments != null) {
-      photo = ModalRoute.of(context)!.settings.arguments as PhotoDetails;
+      photo = ModalRoute.of(context)!.settings.arguments as Photo;
     } else {
-      photo = PhotoDetails("", "", "");
+      photo = Photo("", "", "");
       // Todo: Probably navigate back to the /photos page
     }
 

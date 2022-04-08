@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:aperturama/utils/main_drawer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:aperturama/utils/media.dart';
 
 import '../utils/main_drawer.dart';
 
@@ -23,19 +24,19 @@ class _SharedState extends State<Shared> {
   // TODO: Enable swipe down to reload
 
   // Store the URLs for all the photos the app needs to download and cache
-  Future<SharedData> _getSharedList() async {
-    List<PhotoDetails> photos = [];
+  Future<PhotosCollectionsLists> _getSharedList() async {
+    List<Photo> photos = [];
 
     // For now, make up urls
     for (int i = 0; i < 17; i++) {
-      photos.add(PhotoDetails(
+      photos.add(Photo(
         photos.length.toString(),
         'https://picsum.photos/seed/' + photos.length.toString() + '/256',
         'https://picsum.photos/seed/' + photos.length.toString() + '/4096',
       ));
     }
 
-    List<CollectionDetails> collections = [];
+    List<Collection> collections = [];
 
     // For now, make up some collections
     var rng = Random();
@@ -45,9 +46,9 @@ class _SharedState extends State<Shared> {
       int photoCount = rng.nextInt(100) + 10;
       int videoCount = rng.nextInt(100) + 10;
 
-      List<PhotoDetails> p = [];
+      List<Photo> p = [];
       for (int k = 1; k <= photoCount; k++) {
-        p.add(PhotoDetails(
+        p.add(Photo(
             k.toString(),
             'https://picsum.photos/seed/' +
                 (i * numCollections + k).toString() +
@@ -57,7 +58,7 @@ class _SharedState extends State<Shared> {
                 '/4096'));
       }
 
-      collections.add(CollectionDetails(
+      collections.add(Collection(
           "Collection " + (i + 1).toString(),
           photoCount.toString() +
               " Photos, " +
@@ -70,7 +71,7 @@ class _SharedState extends State<Shared> {
 
     // TODO: Save and load from disk if network is unavailable
 
-    SharedData sd = SharedData(collections, photos);
+    PhotosCollectionsLists sd = PhotosCollectionsLists(collections, photos);
 
     return sd;
   }
@@ -146,7 +147,7 @@ class _SharedState extends State<Shared> {
           Container(
             child: kIsWeb ? const MainDrawer() : null,
           ),
-          FutureBuilder<SharedData>(
+          FutureBuilder<PhotosCollectionsLists>(
             future: _getSharedList(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
@@ -179,11 +180,4 @@ class _SharedState extends State<Shared> {
         ]),
         drawer: kIsWeb ? null : const MainDrawer());
   }
-}
-
-class SharedData {
-  final List<CollectionDetails> collections;
-  final List<PhotoDetails> photos;
-
-  SharedData(this.collections, this.photos);
 }

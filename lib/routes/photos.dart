@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:aperturama/utils/main_drawer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:aperturama/utils/media.dart';
 
 import '../utils/main_drawer.dart';
 
@@ -21,12 +22,12 @@ class _PhotosState extends State<Photos> {
   // TODO: Enable swipe down to reload
 
   // Store the URLs for all the photos the app needs to download and cache
-  Future<List<PhotoDetails>> _getPhotosList() async {
-    List<PhotoDetails> photos = [];
+  Future<List<Photo>> _getPhotosList() async {
+    List<Photo> photos = [];
 
     // For now, make up urls
     for (int i = 0; i < 512; i++) {
-      photos.add(PhotoDetails(
+      photos.add(Photo(
         photos.length.toString(),
         'https://picsum.photos/seed/' + photos.length.toString() + '/256',
         'https://picsum.photos/seed/' + photos.length.toString() + '/4096',
@@ -110,7 +111,7 @@ class _PhotosState extends State<Photos> {
             child: kIsWeb ? const MainDrawer() : null,
           ),
           Expanded(
-            child: FutureBuilder<List<PhotoDetails>>(
+            child: FutureBuilder<List<Photo>>(
               future: _getPhotosList(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -130,10 +131,10 @@ class _PhotosState extends State<Photos> {
 class PhotoGrid extends StatelessWidget {
   const PhotoGrid(this.photos, this.gridSize, {Key? key}) : super(key: key);
 
-  final List<PhotoDetails> photos;
+  final List<Photo> photos;
   final int gridSize;
 
-  Widget _createTappablePhotoIcon(BuildContext context, PhotoDetails photo) {
+  Widget _createTappablePhotoIcon(BuildContext context, Photo photo) {
     // Make a nice button that has the thumbnail inside it
     return GestureDetector(
       onTap: () =>
@@ -162,7 +163,7 @@ class PhotoGrid extends StatelessWidget {
 class PhotoIcon extends StatelessWidget {
   const PhotoIcon(final this.photo, {Key? key}) : super(key: key);
 
-  final PhotoDetails photo;
+  final Photo photo;
 
   @override
   Widget build(BuildContext context) {
@@ -196,10 +197,3 @@ class PhotoIcon extends StatelessWidget {
   }
 }
 
-class PhotoDetails {
-  final String photoID;
-  final String thumbnailURL;
-  final String highresURL;
-
-  PhotoDetails(this.photoID, this.thumbnailURL, this.highresURL);
-}
