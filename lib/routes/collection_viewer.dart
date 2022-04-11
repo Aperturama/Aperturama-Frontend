@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:aperturama/routes/collection_settings.dart';
-import 'package:aperturama/routes/photos.dart';
+import 'package:aperturama/routes/media_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:aperturama/utils/media.dart';
@@ -111,7 +111,7 @@ class _CollectionViewerState extends State<CollectionViewer> {
               contentPadding: EdgeInsets.only(left: 14, bottom: 10),
             ),
             Expanded(
-              child: PhotoGrid(collection.images, _gridSize),
+              child: MediaGrid(collection.images, _gridSize),
             ),
           ],
         ));

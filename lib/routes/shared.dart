@@ -1,11 +1,10 @@
 import 'dart:math';
 
-import 'package:aperturama/routes/collections.dart';
-import 'package:aperturama/routes/photos.dart';
+import 'package:aperturama/routes/collections_list.dart';
+import 'package:aperturama/routes/media_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:aperturama/utils/main_drawer.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aperturama/utils/media.dart';
 
 import '../utils/main_drawer.dart';
@@ -24,15 +23,15 @@ class _SharedState extends State<Shared> {
   // TODO: Enable swipe down to reload
 
   // Store the URLs for all the photos the app needs to download and cache
-  Future<PhotosCollectionsLists> _getSharedList() async {
-    List<Photo> photos = [];
+  Future<MediaCollectionsLists> _getSharedList() async {
+    List<Media> media = [];
 
     // For now, make up urls
     for (int i = 0; i < 17; i++) {
-      photos.add(Photo(
-        photos.length.toString(),
-        'https://picsum.photos/seed/' + photos.length.toString() + '/256',
-        'https://picsum.photos/seed/' + photos.length.toString() + '/4096',
+      media.add(Media(
+        media.length.toString(), MediaType.photo,
+        'https://picsum.photos/seed/' + media.length.toString() + '/256',
+        'https://picsum.photos/seed/' + media.length.toString() + '/4096',
       ));
     }
 
@@ -46,10 +45,10 @@ class _SharedState extends State<Shared> {
       int photoCount = rng.nextInt(100) + 10;
       int videoCount = rng.nextInt(100) + 10;
 
-      List<Photo> p = [];
+      List<Media> p = [];
       for (int k = 1; k <= photoCount; k++) {
-        p.add(Photo(
-            k.toString(),
+        p.add(Media(
+            k.toString(), MediaType.photo,
             'https://picsum.photos/seed/' +
                 (i * numCollections + k).toString() +
                 '/256',
@@ -71,7 +70,7 @@ class _SharedState extends State<Shared> {
 
     // TODO: Save and load from disk if network is unavailable
 
-    PhotosCollectionsLists sd = PhotosCollectionsLists(collections, photos);
+    MediaCollectionsLists sd = MediaCollectionsLists(collections, media);
 
     return sd;
   }
@@ -147,7 +146,7 @@ class _SharedState extends State<Shared> {
           Container(
             child: kIsWeb ? const MainDrawer() : null,
           ),
-          FutureBuilder<PhotosCollectionsLists>(
+          FutureBuilder<MediaCollectionsLists>(
             future: _getSharedList(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
@@ -157,17 +156,17 @@ class _SharedState extends State<Shared> {
                       ListTile(
                         horizontalTitleGap: 0,
                         title: const Text("Collections"),
-                        contentPadding: EdgeInsets.only(left: 14, bottom: 10),
+                        contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
                         subtitle: Text(snapshot.data!.collections.length.toString() + " collections shared with you"),
                       ),
                       CollectionList(snapshot.data!.collections),
                       ListTile(
                         horizontalTitleGap: 0,
                         title: const Text("Photos"),
-                        contentPadding: EdgeInsets.only(left: 14, bottom: 10),
-                        subtitle: Text(snapshot.data!.photos.length.toString() + " photos shared with you"),
+                        contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
+                        subtitle: Text(snapshot.data!.media.length.toString() + " photos shared with you"),
                       ),
-                     PhotoGrid(snapshot.data!.photos, _gridSize),
+                     MediaGrid(snapshot.data!.media, _gridSize),
                     ],
                   ),
                 );

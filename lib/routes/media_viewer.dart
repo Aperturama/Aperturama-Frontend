@@ -1,11 +1,11 @@
-import 'package:aperturama/routes/photo_settings.dart';
+import 'package:aperturama/routes/media_settings.dart';
 import 'package:aperturama/utils/media.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 
-class PhotoViewer extends StatefulWidget {
-  const PhotoViewer({Key? key}) : super(key: key);
+class MediaViewer extends StatefulWidget {
+  const MediaViewer({Key? key}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -17,21 +17,21 @@ class PhotoViewer extends StatefulWidget {
   // always marked "final".
 
   @override
-  State<PhotoViewer> createState() => _PhotoViewerState();
+  State<MediaViewer> createState() => _MediaViewerState();
 }
 
-class _PhotoViewerState extends State<PhotoViewer> {
+class _MediaViewerState extends State<MediaViewer> {
   double _maxScale = 1;
 
   @override
   Widget build(BuildContext context) {
-    // Take in information about the current photo given as args,
-    // or set it to no photo if the args are invalid for some reason
-    final Photo photo;
+    // Take in information about the current media given as args,
+    // or set it to no media if the args are invalid for some reason
+    final Media media;
     if(ModalRoute.of(context)!.settings.arguments != null) {
-      photo = ModalRoute.of(context)!.settings.arguments as Photo;
+      media = ModalRoute.of(context)!.settings.arguments as Media;
     } else {
-      photo = Photo("", "", "");
+      media = Media("", MediaType.photo, "", "");
       // Todo: Probably navigate back to the /photos page
     }
 
@@ -40,7 +40,7 @@ class _PhotoViewerState extends State<PhotoViewer> {
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
-          title: const Text("Photo Viewer"),
+          title: const Text("Media Viewer"),
           centerTitle: true,
           actions: [
             IconButton(
@@ -52,11 +52,11 @@ class _PhotoViewerState extends State<PhotoViewer> {
                     barrierDismissible: true,
                     opaque: false,
                     pageBuilder: (_, anim1, anim2) =>
-                        PhotoSettings(photo: photo),
+                        MediaSettings(media: media),
                   ),
                 );
               },
-              tooltip: 'Image Information and Settings',
+              tooltip: 'Media Information and Settings',
             ),
           ],
         ),
@@ -65,7 +65,7 @@ class _PhotoViewerState extends State<PhotoViewer> {
               minScale: 1,
               maxScale: _maxScale,
               child: CachedNetworkImage(
-                imageUrl: photo.highresURL,
+                imageUrl: media.highresURL,
                 // Make the image fit the width
                 imageBuilder: (context, imageProvider) {
                   WidgetsBinding.instance?.addPostFrameCallback((_) => setState(() {
@@ -86,7 +86,7 @@ class _PhotoViewerState extends State<PhotoViewer> {
                   children: <Widget>[
                     // Low-res thumbnail
                     CachedNetworkImage(
-                      imageUrl: photo.thumbnailURL,
+                      imageUrl: media.thumbnailURL,
                       progressIndicatorBuilder: (context, url, downloadProgress) =>
                           CircularProgressIndicator(
                               value: downloadProgress.progress),

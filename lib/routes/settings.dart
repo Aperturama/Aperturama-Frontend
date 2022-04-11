@@ -23,142 +23,147 @@ class _AppSettingsState extends State<AppSettings> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: const Text("Settings"),
-    centerTitle: true,
-    ),
-    body: Form(
-      key: _formKey,
-      child: Scrollbar(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Card(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ListTile(
-                      title: Text("Collection Name:"),
-                    ),
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        filled: true,
-                        hintText: 'Enter a name for the collection.',
-                        labelText: 'Collection Name',
+        centerTitle: true,
+      ),
+      body: Form(
+        key: _formKey,
+        child: Scrollbar(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Card(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          ListTile(
+                            title: Text("Your Name"),
+                          ),
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              filled: true,
+                              hintText: 'Enter a name for the collection.',
+                              labelText: 'Collection Name',
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                collectionName = value;
+                              });
+                            },
+                          ),
+                        ],
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          collectionName = value;
-                        });
-                      },
-                    ),
-                    ListTile(
-                      title: Text("Sharing Settings:"),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text('Enable sharing',
-                            style: Theme.of(context).textTheme.bodyText1),
-                        Switch(
-                          value: enableSharing,
-                          onChanged: (enabled) {
-                            setState(() {
-                              enableSharing = enabled;
-                            });
-                          },
+
+
+                      ListTile(
+                        title: Text("Sharing Settings:"),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('Enable sharing',
+                              style: Theme.of(context).textTheme.bodyText1),
+                          Switch(
+                            value: enableSharing,
+                            onChanged: (enabled) {
+                              setState(() {
+                                enableSharing = enabled;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          filled: true,
+                          hintText:
+                              'A link you can share with others to access this collection.',
+                          labelText: 'Sharing Link:',
                         ),
-                      ],
-                    ),
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        filled: true,
-                        hintText:
-                            'A link you can share with others to access this collection.',
-                        labelText: 'Sharing Link:',
+                        onChanged: (value) {
+                          collectionName = value;
+                        },
                       ),
-                      onChanged: (value) {
-                        collectionName = value;
-                      },
-                    ),
-                    Row(children: [
+                      Row(children: [
+                        TextButton(
+                          child: const Text('Copy Link'),
+                          onPressed: () {},
+                        ),
+                        TextButton(
+                          child: const Text('Regenerate'),
+                          onPressed: () {},
+                        ),
+                      ]),
+                      DropdownButton<String>(
+                        value: "Username here", //dropdownValue
+                        icon: const Icon(Icons.arrow_downward),
+                        elevation: 16,
+                        isExpanded: true,
+                        style: const TextStyle(color: Colors.blue),
+                        underline: Container(
+                          height: 2,
+                          color: Colors.blue,
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            //dropdownValue = newValue!;
+                          });
+                        },
+                        items: <String>['Username here', 'Two', 'Free', 'Four']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                      Row(children: [
+                        TextButton(
+                          child: const Text('Shared'),
+                          onPressed: () {},
+                        ),
+                        TextButton(
+                          child: const Text('Editing Allowed'),
+                          onPressed: () {},
+                        ),
+                      ]),
+                      ListTile(
+                        title: Text("Manage Media:"),
+                      ),
+                      Row(children: [
+                        TextButton(
+                          child: const Text('Add'),
+                          onPressed: () {},
+                        ),
+                        TextButton(
+                          child: const Text('Delete'),
+                          onPressed: () {},
+                        ),
+                      ]),
                       TextButton(
-                        child: const Text('Copy Link'),
+                        style: TextButton.styleFrom(primary: Colors.red),
+                        child: const Text('Delete Collection'),
                         onPressed: () {},
                       ),
-                      TextButton(
-                        child: const Text('Regenerate'),
-                        onPressed: () {},
-                      ),
-                    ]),
-                    DropdownButton<String>(
-                      value: "Username here", //dropdownValue
-                      icon: const Icon(Icons.arrow_downward),
-                      elevation: 16,
-                      isExpanded: true,
-                      style: const TextStyle(color: Colors.blue),
-                      underline: Container(
-                        height: 2,
-                        color: Colors.blue,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          //dropdownValue = newValue!;
-                        });
-                      },
-                      items: <String>['Username here', 'Two', 'Free', 'Four']
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                    Row(children: [
-                      TextButton(
-                        child: const Text('Shared'),
-                        onPressed: () {},
-                      ),
-                      TextButton(
-                        child: const Text('Editing Allowed'),
-                        onPressed: () {},
-                      ),
-                    ]),
-                    ListTile(
-                      title: Text("Manage Media:"),
-                    ),
-                    Row(children: [
-                      TextButton(
-                        child: const Text('Add'),
-                        onPressed: () {},
-                      ),
-                      TextButton(
-                        child: const Text('Delete'),
-                        onPressed: () {},
-                      ),
-                    ]),
-                    TextButton(
-                      style: TextButton.styleFrom(primary: Colors.red),
-                      child: const Text('Delete Collection'),
-                      onPressed: () {},
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
-    ),
-        drawer: kIsWeb ? null : const MainDrawer(),
+      drawer: kIsWeb ? null : const MainDrawer(),
     );
-
   }
 }

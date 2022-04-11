@@ -1,16 +1,16 @@
 import 'package:aperturama/utils/media.dart';
 import 'package:flutter/material.dart';
 
-class PhotoSettings extends StatefulWidget {
-  const PhotoSettings({Key? key, required this.photo}) : super(key: key);
+class MediaSettings extends StatefulWidget {
+  const MediaSettings({Key? key, required this.media}) : super(key: key);
 
-  final Photo photo;
+  final Media media;
 
   @override
-  State<PhotoSettings> createState() => _PhotoSettingsState();
+  State<MediaSettings> createState() => _MediaSettingsState();
 }
 
-class _PhotoSettingsState extends State<PhotoSettings> {
+class _MediaSettingsState extends State<MediaSettings> {
 
   final _formKey = GlobalKey<FormState>();
   String collectionName = '';

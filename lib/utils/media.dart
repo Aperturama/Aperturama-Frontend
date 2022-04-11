@@ -1,77 +1,66 @@
+enum MediaType {
+  photo,
+  video
+}
+
 class Media {
+  late final String id;
+  final MediaType type;
+  late final String thumbnailURL;
+  late final String highresURL;
+  late final String localPath;
+  late bool uploadedSuccessfully;
+  late final DateTime uploadedTimestamp;
 
-  Media();
+  Media(this.id, this.type, this.thumbnailURL, this.highresURL);
 
-  Media.fromJson(Map<String, dynamic> json);
+  Media.uploaded(this.id, this.type, this.thumbnailURL, this.highresURL,
+      this.localPath, this.uploadedTimestamp) {
+    uploadedSuccessfully = true;
+  }
 
-  Map<String, dynamic> toJson() => {};
+  Media.pendingUpload(this.type, this.localPath) {
+    uploadedSuccessfully = false;
+  }
 
-}
-
-
-class Photo extends Media {
-  final String photoID;
-  final String thumbnailURL;
-  final String highresURL;
-
-  Photo(this.photoID, this.thumbnailURL, this.highresURL);
-
-  @override
-  Photo.fromJson(Map<String, dynamic> json)
-      : photoID = json['photoID'],
+  Media.fromJson(Map<String, dynamic> json) :
+        id = json['id'],
+        type = MediaType.values.byName(json['type']),
         thumbnailURL = json['thumbnailURL'],
-        highresURL = json['highresURL'];
+        highresURL = json['highresURL'],
+        localPath = json['localPath'],
+        uploadedSuccessfully = json['uploadedSuccessfully'] == "true" ? true : false,
+        uploadedTimestamp = DateTime.parse(json['uploadedTimestamp']);
 
-  @override
   Map<String, dynamic> toJson() => {
-    'originalType': "photo",
-    'photoID' : photoID,
+    'id' : id,
+    'type': type.name,
     'thumbnailURL' : thumbnailURL,
     'highresURL' : highresURL,
+    'localPath' : localPath,
+    'uploadedSuccessfully' : uploadedSuccessfully ? "true" : "false",
+    'uploadedTimestamp' : uploadedTimestamp.toIso8601String(),
   };
+
 }
-
-// TODO: Convert/fully implement this class
-class Video extends Media {
-  final String photoID;
-  final String thumbnailURL;
-  final String highresURL;
-
-  Video(this.photoID, this.thumbnailURL, this.highresURL);
-
-  @override
-  Video.fromJson(Map<String, dynamic> json)
-      : photoID = json['photoID'],
-        thumbnailURL = json['thumbnailURL'],
-        highresURL = json['highresURL'];
-
-  @override
-  Map<String, dynamic> toJson() => {
-    'originalType': "video",
-    'photoID' : photoID,
-    'thumbnailURL' : thumbnailURL,
-    'highresURL' : highresURL,
-  };
-}
-
 
 class Collection {
   final String name;
   final String information;
   final String url;
   final bool shared;
-  final List<Photo> images; // may also be previewImages and the rest gathered
+  final List<Media> images; // may also be previewImages and the rest gathered
   // in collection_viewer, which is probably better. new field needed though
 
   Collection(this.name, this.information, this.url, this.shared, this.images);
 }
 
 
-class PhotosCollectionsLists {
+class MediaCollectionsLists {
   final List<Collection> collections;
-  final List<Photo> photos;
+  final List<Media> media;
 
-  PhotosCollectionsLists(this.collections, this.photos);
+  MediaCollectionsLists(this.collections, this.media);
 }
 
 class MediaFolder {
@@ -82,10 +71,11 @@ class MediaFolder {
 
   MediaFolder.fromJson(Map<String, dynamic> json)
       : path = json['path'],
-        itemCount = 0;
+        itemCount = json['itemCount'];
 
   Map<String, dynamic> toJson() => {
     'path' : path,
+    'itemCount' : itemCount
   };
 }
 

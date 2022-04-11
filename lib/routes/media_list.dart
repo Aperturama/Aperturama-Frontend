@@ -8,35 +8,35 @@ import 'package:aperturama/utils/media.dart';
 
 import '../utils/main_drawer.dart';
 
-class Photos extends StatefulWidget {
-  const Photos({Key? key}) : super(key: key);
+class MediaList extends StatefulWidget {
+  const MediaList({Key? key}) : super(key: key);
 
   @override
-  State<Photos> createState() => _PhotosState();
+  State<MediaList> createState() => _MediaListState();
 }
 
-class _PhotosState extends State<Photos> {
+class _MediaListState extends State<MediaList> {
   int _gridSize = 0; // Start at 0 and set during the first build
   int _gridSizeMax = 0; // Start at 0 and set during the first build
 
   // TODO: Enable swipe down to reload
 
   // Store the URLs for all the photos the app needs to download and cache
-  Future<List<Photo>> _getPhotosList() async {
-    List<Photo> photos = [];
+  Future<List<Media>> _getMediaList() async {
+    List<Media> media = [];
 
     // For now, make up urls
     for (int i = 0; i < 512; i++) {
-      photos.add(Photo(
-        photos.length.toString(),
-        'https://picsum.photos/seed/' + photos.length.toString() + '/256',
-        'https://picsum.photos/seed/' + photos.length.toString() + '/4096',
+      media.add(Media(
+        media.length.toString(), MediaType.photo,
+        'https://picsum.photos/seed/' + media.length.toString() + '/256',
+        'https://picsum.photos/seed/' + media.length.toString() + '/4096',
       ));
     }
 
     // TODO: Save and load from disk if network is unavailable
 
-    return photos;
+    return media;
   }
 
   // Function to handle changing the size of the photo grid
@@ -111,11 +111,11 @@ class _PhotosState extends State<Photos> {
             child: kIsWeb ? const MainDrawer() : null,
           ),
           Expanded(
-            child: FutureBuilder<List<Photo>>(
-              future: _getPhotosList(),
+            child: FutureBuilder<List<Media>>(
+              future: _getMediaList(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return PhotoGrid(snapshot.data!, _gridSize);
+                  return MediaGrid(snapshot.data!, _gridSize);
                 } else if (snapshot.hasError) {
                   return const Text("Error");
                 }
@@ -128,18 +128,18 @@ class _PhotosState extends State<Photos> {
   }
 }
 
-class PhotoGrid extends StatelessWidget {
-  const PhotoGrid(this.photos, this.gridSize, {Key? key}) : super(key: key);
+class MediaGrid extends StatelessWidget {
+  const MediaGrid(this.media, this.gridSize, {Key? key}) : super(key: key);
 
-  final List<Photo> photos;
+  final List<Media> media;
   final int gridSize;
 
-  Widget _createTappablePhotoIcon(BuildContext context, Photo photo) {
+  Widget _createTappableMediaIcon(BuildContext context, Media media) {
     // Make a nice button that has the thumbnail inside it
     return GestureDetector(
       onTap: () =>
-          {Navigator.pushNamed(context, '/photo_viewer', arguments: photo)},
-      child: PhotoIcon(photo),
+          {Navigator.pushNamed(context, '/media_viewer', arguments: media)},
+      child: MediaIcon(media),
     );
   }
 
@@ -153,17 +153,17 @@ class PhotoGrid extends StatelessWidget {
       gridDelegate:
           SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: gridSize),
       itemBuilder: (BuildContext context, int index) {
-        return _createTappablePhotoIcon(context, photos[index]);
+        return _createTappableMediaIcon(context, media[index]);
       },
-      itemCount: photos.length,
+      itemCount: media.length,
     );
   }
 }
 
-class PhotoIcon extends StatelessWidget {
-  const PhotoIcon(final this.photo, {Key? key}) : super(key: key);
+class MediaIcon extends StatelessWidget {
+  const MediaIcon(final this.media, {Key? key}) : super(key: key);
 
-  final Photo photo;
+  final Media media;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +174,7 @@ class PhotoIcon extends StatelessWidget {
       ),
       child: Center(
         child: CachedNetworkImage(
-            imageUrl: photo.thumbnailURL,
+            imageUrl: media.thumbnailURL,
             progressIndicatorBuilder: (context, url, downloadProgress) =>
                 SizedBox(
                     width: 32,

@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:aperturama/routes/photos.dart';
+import 'package:aperturama/routes/media_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -29,10 +29,10 @@ class _CollectionsState extends State<Collections> {
       int photoCount = rng.nextInt(100) + 10;
       int videoCount = rng.nextInt(100) + 10;
 
-      List<Photo> p = [];
+      List<Media> m = [];
       for (int k = 1; k <= photoCount; k++) {
-        p.add(Photo(
-            k.toString(),
+        m.add(Media(
+            k.toString(), MediaType.photo,
             'https://picsum.photos/seed/' +
                 (i * numCollections + k).toString() +
                 '/256',
@@ -49,7 +49,7 @@ class _CollectionsState extends State<Collections> {
               " Videos",
           "random url",
           rng.nextInt(2) == 0 ? false : true,
-          p));
+          m));
     }
 
     // TODO: Save and load from disk if network is unavailable
@@ -117,7 +117,7 @@ class CollectionList extends StatelessWidget {
               shrinkWrap: true,
               crossAxisCount: 4,
               children: List.generate(4, (index) {
-                return PhotoIcon(collection.images[index]);
+                return MediaIcon(collection.images[index]);
               }),
             ),
             ListTile(

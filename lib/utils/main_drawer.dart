@@ -34,9 +34,9 @@ class MainDrawer extends StatelessWidget {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.image),
-                      title: const Text('Photos'),
+                      title: const Text('Photos and Videos'),
                       onTap: () {
-                        Navigator.pushReplacementNamed(context, '/photos');
+                        Navigator.pushReplacementNamed(context, '/media');
                       },
                     ),
                     ListTile(
