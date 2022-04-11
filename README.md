@@ -8,6 +8,9 @@
 - Photo and collection IDs in the URL for reloaded pages to work properly
 - Ability to swipe left/right on photos to move to the next/previous
 - Video support
+- More animations (See https://docs.flutter.dev/cookbook/animation/page-route-animation, https://pub.dev/packages/simple_animations, https://flutter.github.io/samples/animations.html)
+- A splash screen (https://docs.flutter.dev/development/ui/advanced/splash-screen)
+- Proper looking name/app icon on Android
 
 # References Used:
 https://docs.flutter.dev/cookbook/lists/grid-lists
@@ -78,7 +81,22 @@ https://stackoverflow.com/questions/51901379/how-to-set-size-to-circularprogress
 https://stackoverflow.com/questions/11674820/how-do-i-generate-random-numbers-in-dart
 https://stackoverflow.com/questions/48405123/how-to-set-custom-height-for-widget-in-gridview-in-flutter
 https://stackoverflow.com/questions/69208509/gridview-count-vs-gridview-builder-difference-in-flutter
-
+https://docs.flutter.dev/development/ui/layout/tutorial
+https://docs.flutter.dev/development/ui/interactive
+docs.flutter.dev/get-started/flutter-for/web-devs
+https://api.flutter.dev/flutter/foundation/TargetPlatform.html
+https://api.flutter.dev/flutter/foundation/defaultTargetPlatform.html
+api.flutter.dev/flutter/foundation/TargetPlatform.html
+https://stackoverflow.com/questions/50252569/vertical-viewport-was-given-unbounded-height
+https://api.flutter.dev/flutter/foundation/kIsWeb-constant.html
+stackoverflow.com/questions/57937280/how-can-i-detect-if-my-flutter-app-is-running-in-the-web
+https://codewithandrea.com/articles/flutter-responsive-layouts-split-view-drawer-navigation/
+https://stackoverflow.com/questions/62829298/flutter-await-a-function-before-build
+https://stackoverflow.com/questions/52295949/what-is-initstate-and-super-initstate-in-flutter
+https://medium.flutterdevs.com/exploring-inheritance-and-composition-in-dart-flutter-71ceefc45c9c
+https://medium.com/flutter-community/serializing-your-object-in-flutter-ab510f0b8b47
+https://stackoverflow.com/questions/51224205/what-is-the-purpose-of-override-used-in-flutter
+https://api.flutter.dev/flutter/material/ListTile-class.html
 
 
 

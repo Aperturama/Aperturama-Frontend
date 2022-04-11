@@ -76,11 +76,13 @@ class PhotosCollectionsLists {
 
 class MediaFolder {
   String path;
+  int itemCount;
 
-  MediaFolder(this.path);
+  MediaFolder(this.path, this.itemCount);
 
   MediaFolder.fromJson(Map<String, dynamic> json)
-      : path = json['path'];
+      : path = json['path'],
+        itemCount = 0;
 
   Map<String, dynamic> toJson() => {
     'path' : path,
