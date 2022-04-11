@@ -43,22 +43,7 @@ class _AutoUploadState extends State<AutoUpload> {
     log(_localMediaFoldersString);
 
     if(_recentlyUploadedString != "") {
-      //Map<String, dynamic> decodedList = jsonDecode(_recentlyUploadedString);
-      //List<dynamic> jsonList = decodedList['media'];
       List<dynamic> jsonList = jsonDecode(_recentlyUploadedString);
-
-/*      // Convert to a list again
-      List<Media> _recentlyUploadedList = [];
-      jsonList.map<Media>((elem) => {
-        jsonDecode(elem) as Media
-      }).toList();
-
-      log(jsonList.toString());
-
-      setState(() {
-        recentlyUploaded = jsonList as List<Media>;
-      });*/
-
       for(var j in jsonList) {
         Media m = Media.fromJson(j);
         recentlyUploaded.add(m);
@@ -161,6 +146,9 @@ class _AutoUploadState extends State<AutoUpload> {
       if(f is File) {
         folder.itemCount++;
 
+        // Check if there are any unknown photos
+        // TODO: Make a bunch of HTTP requests to the backend server
+
         // Add them to the recently uploaded list
         // TODO: Only if newly uploaded
         Media m = Media.uploaded(
@@ -173,9 +161,6 @@ class _AutoUploadState extends State<AutoUpload> {
         _addMediaToRecentlyUploaded(m);
       }
     }
-
-    // Check if there are any unknown photos
-    // TODO: Make a bunch of HTTP requests to the backend server
 
     // Rerender the UI
     setState(() {});
@@ -201,8 +186,6 @@ class _AutoUploadState extends State<AutoUpload> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
           title: const Text("Automatic Upload"),
           centerTitle: true,
         ),
@@ -216,7 +199,7 @@ class _AutoUploadState extends State<AutoUpload> {
                 ListTile(
                   horizontalTitleGap: 0,
                   title: const Text("Recently Uploaded"),
-                  contentPadding: EdgeInsets.only(left: 14),
+                  contentPadding: const EdgeInsets.only(left: 14),
                   subtitle: Text("Last sync: " + (lastSync.year != 1970 ?
                       lastSync.year.toString() + "/" +
                       lastSync.month.toString() + "/" +
@@ -231,7 +214,7 @@ class _AutoUploadState extends State<AutoUpload> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.clear), // Clear recents button
+                        icon: const Icon(Icons.clear), // Clear recent uploads button
                         onPressed: () {
                           setState(() {
                             recentlyUploaded.clear();
@@ -256,30 +239,14 @@ class _AutoUploadState extends State<AutoUpload> {
                 ),
                 const Divider(),
                 Expanded(
-                  child: /*ListView(
-                    shrinkWrap: true,
-                    children: [
-                      ListTile(
-                        leading: FlutterLogo(size: 56.0),
-                        title: const Text("path/Filename"),
-                        subtitle: Text("Uploaded: 2022/04/05 11:25am"),
-                      ),
-                      ListTile(
-                        leading: FlutterLogo(size: 56.0),
-                        title: const Text("path/Filename"),
-                        subtitle: Text("Uploaded: 2022/04/05 11:25am"),
-                      ),
-                      //CollectionList(snapshot.data!.collections),
-                    ],
-                  )*/
-                  recentlyUploaded.isNotEmpty ? ListView.builder(
+                  child: recentlyUploaded.isNotEmpty ? ListView.builder(
                     shrinkWrap: true,
                     // This is needed for the shared media page
                     // so that it doesn't scroll within the larger scrollable list
                     physics: const ClampingScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
                       return ListTile(
-                        leading: Container(
+                        leading: SizedBox(
                             width: 56,
                             height: 56,
                             child: MediaIcon(recentlyUploaded[index])),
@@ -293,8 +260,6 @@ class _AutoUploadState extends State<AutoUpload> {
                             ((recentlyUploaded[index].uploadedTimestamp.hour >= 12) ? " pm" : " am")
                         ),
                       );
-                      /*_createCollectionCard(
-                          context, collections[index]);*/
                     },
                     itemCount: recentlyUploaded.length,
                   )
@@ -332,40 +297,10 @@ class _AutoUploadState extends State<AutoUpload> {
                             },
                           ),
                       );
-                        /*_createCollectionCard(
-                          context, collections[index]);*/
                     },
                     itemCount: localMediaFolders.length,
                   )
                       : const Text("No configured folders."),
-                  /*ListView(
-                    shrinkWrap: true,
-                    children: [
-                      ListTile(
-                        title: const Text("path"),
-                        subtitle: Text("240 Items"),
-                        contentPadding: EdgeInsets.only(left: 14),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.remove_circle_outline),
-                          onPressed: () {
-                            // TODO: Actually trigger a resync
-                          },
-                        ),
-                      ),
-                      ListTile(
-                        title: const Text("path"),
-                        subtitle: Text("240 Items"),
-                        contentPadding: EdgeInsets.only(left: 14),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.remove_circle_outline),
-                          onPressed: () {
-                            // TODO: Actually trigger a resync
-                          },
-                        ),
-                      ),
-                      //PhotoGrid(snapshot.data!.photos, _gridSize),
-                    ],
-                  ),*/
                 ),
               ],
             ),
