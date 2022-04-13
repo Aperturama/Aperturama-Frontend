@@ -43,117 +43,82 @@ class _AppSettingsState extends State<AppSettings> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      const ListTile(
+                        title: Text("Your Name"),
+                      ),
                       Row(
                         children: [
-                          ListTile(
-                            title: Text("Your Name"),
-                          ),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              filled: true,
-                              hintText: 'Enter a name for the collection.',
-                              labelText: 'Collection Name',
+                          Expanded(
+                            child: TextFormField(
+                              decoration: const InputDecoration(
+                                filled: true,
+                                hintText: 'First Name',
+                                labelText: 'First Name',
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  collectionName = value;
+                                });
+                              },
                             ),
-                            onChanged: (value) {
-                              setState(() {
-                                collectionName = value;
-                              });
-                            },
+                          ),
+                          Expanded(
+                            child: TextFormField(
+                              decoration: const InputDecoration(
+                                filled: true,
+                                hintText: 'Last Name',
+                                labelText: 'Last Name',
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  collectionName = value;
+                                });
+                              },
+                            ),
                           ),
                         ],
                       ),
-
-
-                      ListTile(
-                        title: Text("Sharing Settings:"),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text('Enable sharing',
-                              style: Theme.of(context).textTheme.bodyText1),
-                          Switch(
-                            value: enableSharing,
-                            onChanged: (enabled) {
-                              setState(() {
-                                enableSharing = enabled;
-                              });
-                            },
-                          ),
-                        ],
+                      const Divider(),
+                      const ListTile(
+                        title: Text("Email"),
                       ),
                       TextFormField(
                         decoration: const InputDecoration(
                           filled: true,
-                          hintText:
-                              'A link you can share with others to access this collection.',
-                          labelText: 'Sharing Link:',
+                          hintText: 'Email Address',
+                          labelText: 'Email Address',
                         ),
                         onChanged: (value) {
                           collectionName = value;
                         },
                       ),
-                      Row(children: [
-                        TextButton(
-                          child: const Text('Copy Link'),
-                          onPressed: () {},
+                      const Divider(),
+                      const ListTile(
+                        title: Text("Password (if changing)"),
+                      ),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          filled: true,
+                          hintText: 'Password',
+                          labelText: 'Password',
                         ),
-                        TextButton(
-                          child: const Text('Regenerate'),
-                          onPressed: () {},
-                        ),
-                      ]),
-                      DropdownButton<String>(
-                        value: "Username here", //dropdownValue
-                        icon: const Icon(Icons.arrow_downward),
-                        elevation: 16,
-                        isExpanded: true,
-                        style: const TextStyle(color: Colors.blue),
-                        underline: Container(
-                          height: 2,
-                          color: Colors.blue,
-                        ),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            //dropdownValue = newValue!;
-                          });
+                        onChanged: (value) {
+                          collectionName = value;
                         },
-                        items: <String>['Username here', 'Two', 'Free', 'Four']
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
                       ),
-                      Row(children: [
-                        TextButton(
-                          child: const Text('Shared'),
+                      const Divider(),
+                      Center(
+                        child: ElevatedButton(
+                          child: const Text('Save Changes'),
                           onPressed: () {},
                         ),
-                        TextButton(
-                          child: const Text('Editing Allowed'),
-                          onPressed: () {},
-                        ),
-                      ]),
-                      ListTile(
-                        title: Text("Manage Media:"),
                       ),
-                      Row(children: [
-                        TextButton(
-                          child: const Text('Add'),
+                      Center(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(primary: Colors.red),
+                            child: const Text('Log Out'),
                           onPressed: () {},
                         ),
-                        TextButton(
-                          child: const Text('Delete'),
-                          onPressed: () {},
-                        ),
-                      ]),
-                      TextButton(
-                        style: TextButton.styleFrom(primary: Colors.red),
-                        child: const Text('Delete Collection'),
-                        onPressed: () {},
                       ),
                     ],
                   ),
