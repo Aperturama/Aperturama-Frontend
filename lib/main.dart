@@ -1,3 +1,4 @@
+import 'package:aperturama/routes/login.dart';
 import 'package:aperturama/routes/media_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:aperturama/routes/auto_upload.dart';
@@ -33,9 +34,10 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.indigo,
       ),
-      initialRoute: '/',
+      initialRoute: '/login',
       routes: {
         '/': (context) => const MediaList(),
+        '/login': (context) => const AppLogin(),
         '/media': (context) => const MediaList(),
         '/media_viewer': (context) => const MediaViewer(),
         '/collections': (context) => const Collections(),
