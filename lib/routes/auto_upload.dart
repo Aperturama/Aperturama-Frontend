@@ -76,9 +76,9 @@ class _AutoUploadState extends State<AutoUpload> {
     log(_recentlyUploadedJSON);
     log(_localMediaFoldersJSON);
 
-    prefs.setString("recentlyUploaded", _recentlyUploadedJSON);
-    prefs.setString("localMediaFolders", _localMediaFoldersJSON);
-    prefs.setString("lastSync", lastSync.toIso8601String());
+    await prefs.setString("recentlyUploaded", _recentlyUploadedJSON);
+    await prefs.setString("localMediaFolders", _localMediaFoldersJSON);
+    await prefs.setString("lastSync", lastSync.toIso8601String());
 
     log("Saved Preferences");
   }

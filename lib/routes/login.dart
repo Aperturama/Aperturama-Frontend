@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:aperturama/utils/main_drawer.dart';
+import 'package:aperturama/utils/user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +16,7 @@ class _AppLoginState extends State<AppLogin> {
   final _formKey = GlobalKey<FormState>();
   String email = "";
   String password = "";
+  String serverAddress = "";
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +57,23 @@ class _AppLoginState extends State<AppLogin> {
                   TextFormField(
                     decoration: const InputDecoration(
                       filled: true,
+                      hintText: 'Server Address',
+                      labelText: 'Server Address',
+                    ),
+                    onChanged: (value) {
+                      serverAddress = value;
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your server address';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      filled: true,
                       hintText: 'Email Address',
                       labelText: 'Email Address',
                     ),
@@ -87,13 +108,37 @@ class _AppLoginState extends State<AppLogin> {
                   Center(
                     child: ElevatedButton(
                       child: const Text('Log in'),
-                      onPressed: () {
+                      onPressed: () async {
+                        // Drop the keyboard
+                        FocusManager.instance.primaryFocus?.unfocus();
+
                         // Validate returns true if the form is valid, or false otherwise.
                         if (_formKey.currentState!.validate()) {
-                          // If the form is valid, display a snackbar. In the real world,
-                          // you'd often call a server or save the information in a database.
+                          // Show a snackbar message
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Logging in...')),
+                          );
+
+                          bool result = await User.tryLogIn(serverAddress, email, password);
+                          if(result) {
+                            // Show a snackbar message
+                            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Logged in successfully!.')),
+                            );
+                            Navigator.pushReplacementNamed(context, '/media');
+                          } else {
+                            // Show a snackbar message
+                            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Invalid credentials.')),
+                            );
+                          }
+
+                        } else {
+                          // Show a snackbar message
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Please correct the issues above.')),
                           );
                         }
                       },
@@ -105,7 +150,6 @@ class _AppLoginState extends State<AppLogin> {
           ),
         ),
       ),
-      drawer: kIsWeb ? null : const MainDrawer(),
     );
   }
 }

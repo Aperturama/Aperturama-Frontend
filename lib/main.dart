@@ -34,10 +34,9 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.indigo,
       ),
-      initialRoute: '/login',
+      initialRoute: '/',
       routes: {
-        '/': (context) => const MediaList(),
-        '/login': (context) => const AppLogin(),
+        '/': (context) => const AppLogin(),
         '/media': (context) => const MediaList(),
         '/media_viewer': (context) => const MediaViewer(),
         '/collections': (context) => const Collections(),
