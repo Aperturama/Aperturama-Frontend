@@ -25,7 +25,7 @@ class _AutoUploadState extends State<AutoUpload> {
   List<MediaFolder> localMediaFolders = [];
   DateTime lastSync = DateTime.parse("1970-01-01 00:00:00");
 
-  // Load settings from disk
+  // Load settings from disk on first load
   @override
   void initState() {
     super.initState();

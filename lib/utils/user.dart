@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -7,14 +9,11 @@ class User {
   User();
 
   static Future<bool> isLoggedIn() async {
-
     // Create storage
     final prefs = await SharedPreferences.getInstance();
 
     // Read value
-    bool isLoggedIn = prefs.getBool("isLoggedIn") ?? false;
-
-    return isLoggedIn;
+    return prefs.getBool("isLoggedIn") ?? false;
   }
 
   static Future<String> getJWT() async {
@@ -22,27 +21,53 @@ class User {
     const storage = FlutterSecureStorage();
 
     // Read value
-    String jwt = await storage.read(key: "jwt") ?? "";
+    return await storage.read(key: "jwt") ?? "";
+  }
 
-    return jwt;
+  static Future<String> getServerAddress() async {
+    // Create storage
+    final prefs = await SharedPreferences.getInstance();
+
+    // Read value
+    return prefs.getString("serverAddress") ?? "";
+  }
+
+  static Future<String> getEmail() async {
+    // Create storage
+    final prefs = await SharedPreferences.getInstance();
+
+    // Read value
+    return prefs.getString("email") ?? "";
   }
 
   static Future<bool> tryLogIn(String serverAddress, String email, String password) async {
+    // Create storages
+    const storage = FlutterSecureStorage();
+    final prefs = await SharedPreferences.getInstance();
 
-    // TODO: Send a request to the backend, get a JWT in return
+    // Store the data for the user
+    await prefs.setString("serverAddress", serverAddress);
+    await prefs.setString("email", email);
+
+    // Send a request to the backend with the login info
     Map<String, String> loginInfo = {email: email, password: password};
-    http.Response resp = await http.post(Uri.parse(serverAddress + '/login'), body: loginInfo);
+    http.Response resp;
+    try {
+      resp = await http.post(Uri.parse(serverAddress + '/login'), body: loginInfo);
+    } on SocketException {
+      return false;
+    }
+
+    if(resp.statusCode == 200) {
+      // TODO: Get info
+    }
     String jwt = "I'm a JWT!";
 
     if(jwt != "") {
-
-      // Create storages
-      const storage = FlutterSecureStorage();
-      final prefs = await SharedPreferences.getInstance();
-
-      // Write value
+      // Write values
       await storage.write(key: "jwt", value: jwt);
       await prefs.setBool("isLoggedIn", true);
+      // TODO: Save first/last name too
 
       return true;
 
