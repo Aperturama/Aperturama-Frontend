@@ -90,45 +90,95 @@ class _AppLoginState extends State<AppLogin> {
         },
       ),
       const SizedBox(height: 10),
-      Center(
-          child: ElevatedButton(
-        child: const Text('Log in'),
-        onPressed: () async {
-          // Drop the keyboard
-          FocusManager.instance.primaryFocus?.unfocus();
+      Row(
+        mainAxisAlignment:
+            MainAxisAlignment.center, //Center Row contents horizontally,
+        crossAxisAlignment:
+            CrossAxisAlignment.center, //Center Row contents vertically,
+        children: [
+          ElevatedButton(
+            child: const Text('Log in'),
+            onPressed: () async {
+              // Drop the keyboard
+              FocusManager.instance.primaryFocus?.unfocus();
 
-          // Validate returns true if the form is valid, or false otherwise.
-          if (_formKey.currentState!.validate()) {
-            // Show a snackbar message
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Logging in...')),
-            );
+              // Validate returns true if the form is valid, or false otherwise.
+              if (_formKey.currentState!.validate()) {
+                // Show a snackbar message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Logging in...')),
+                );
 
-            bool result = await User.tryLogIn(serverAddress, email, password);
-            if (result) {
-              // Login succeeded
-              // Show a snackbar message
-              ScaffoldMessenger.of(context).removeCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Logged in successfully!.')),
-              );
-              Navigator.pushReplacementNamed(context, '/media');
-            } else {
-              // Login failed
-              // Show a snackbar message
-              ScaffoldMessenger.of(context).removeCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Login failed.')),
-              );
-            }
-          } else {
-            // Show a snackbar message
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please correct the issues above.')),
-            );
-          }
-        },
-      ))
+                bool result =
+                    await User.tryLogIn(serverAddress, email, password);
+                if (result) {
+                  // Login succeeded
+                  // Show a snackbar message
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Logged in successfully!.')),
+                  );
+                  Navigator.pushReplacementNamed(context, '/media');
+                } else {
+                  // Login failed
+                  // Show a snackbar message
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Login failed.')),
+                  );
+                }
+              } else {
+                // Show a snackbar message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Please correct the issues above.')),
+                );
+              }
+            },
+          ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            child: const Text('Register'),
+            onPressed: () async {
+              // Drop the keyboard
+              FocusManager.instance.primaryFocus?.unfocus();
+
+              // Validate returns true if the form is valid, or false otherwise.
+              if (_formKey.currentState!.validate()) {
+                // Show a snackbar message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Registering...')),
+                );
+
+                bool result =
+                    await User.tryRegister(serverAddress, email, password);
+                if (result) {
+                  // Registering succeeded
+                  // Show a snackbar message
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Registered and logged in successfully!.')),
+                  );
+                  Navigator.pushReplacementNamed(context, '/media');
+                } else {
+                  // Registering failed
+                  // Show a snackbar message
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Registration failed.')),
+                  );
+                }
+              } else {
+                // Show a snackbar message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Please correct the issues above.')),
+                );
+              }
+            },
+          ),
+        ],
+      )
     ];
   }
 
@@ -169,7 +219,7 @@ class _AppLoginState extends State<AppLogin> {
                   if (initialDataPending)
                     const CircularProgressIndicator()
                   else
-                     ...loginForm(context),
+                    ...loginForm(context),
                 ],
               ),
             ),
