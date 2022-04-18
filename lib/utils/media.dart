@@ -47,12 +47,12 @@ class Media {
 class Collection {
   final String name;
   final String information;
-  final String url;
+  final String id;
   final bool shared;
   final List<Media> images; // may also be previewImages and the rest gathered
   // in collection_viewer, which is probably better. new field needed though
 
-  Collection(this.name, this.information, this.url, this.shared, this.images);
+  Collection(this.name, this.information, this.id, this.shared, this.images);
 }
 
 

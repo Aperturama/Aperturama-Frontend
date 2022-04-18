@@ -157,7 +157,7 @@ class _AppLoginState extends State<AppLogin> {
                   // Show a snackbar message
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Registered and logged in successfully!.')),
+                    const SnackBar(content: Text('Registered and logged in successfully!')),
                   );
                   Navigator.pushReplacementNamed(context, '/media');
                 } else {

@@ -1,12 +1,17 @@
-import 'dart:math';
+import 'dart:convert';
+import 'dart:math' as math;
+import 'dart:io';
 
 import 'package:aperturama/routes/media_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aperturama/utils/media.dart';
+import 'package:http/http.dart' as http;
+import 'dart:developer';
 
 import '../utils/main_drawer.dart';
+import '../utils/user.dart';
 
 class Collections extends StatefulWidget {
   const Collections({Key? key}) : super(key: key);
@@ -21,35 +26,68 @@ class _CollectionsState extends State<Collections> {
   Future<List<Collection>> _getCollectionsList() async {
     List<Collection> collections = [];
 
-    // For now, make up some collections
-    var rng = Random();
-    int numCollections = 20;
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections'),
+          headers: {
+            HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+          });
+    } on SocketException {
+      log("Collection listing failed: Socket exception");
+      return collections;
+    }
 
-    for (int i = 0; i < numCollections; i++) {
-      int photoCount = rng.nextInt(100) + 10;
-      int videoCount = rng.nextInt(100) + 10;
+    if(resp.statusCode != 200) {
+      log("Collection listing failed: Code " + resp.statusCode.toString());
+      return collections;
+    }
 
-      List<Media> m = [];
-      for (int k = 1; k <= photoCount; k++) {
-        m.add(Media(
-            k.toString(), MediaType.photo,
-            'https://picsum.photos/seed/' +
-                (i * numCollections + k).toString() +
-                '/256',
-            'https://picsum.photos/seed/' +
-                (i * numCollections + k).toString() +
-                '/4096'));
+    log(resp.body);
+    final responseJson = jsonDecode(resp.body);
+    log(responseJson);
+
+    // For each collection item we got
+    for (int i = 0; i < responseJson.length; i++) {
+      // Find all the photos
+      // Send a request to the backend
+      try {
+        resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + responseJson.collection_id),
+            headers: {
+              HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+            });
+      } on SocketException {
+        log("Collection media listing failed: Socket exception");
+        return collections;
       }
 
+      if(resp.statusCode != 200) {
+        log("Collection media listing failed: Code " + resp.statusCode.toString());
+        return collections;
+      }
+
+      log(resp.body);
+      final responseJson2 = jsonDecode(resp.body);
+      log(responseJson2);
+
+      List<Media> m = [];
+      final cmedia = responseJson2.media;
+      for (int k = 0; k < cmedia.length; k++) {
+        m.add(Media(
+          cmedia[i].media_id, MediaType.photo,
+          serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/thumbnail',
+          serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/media',
+        ));
+      }
+
+      // Save the collection
       collections.add(Collection(
-          "Collection " + (i + 1).toString(),
-          photoCount.toString() +
-              " Photos, " +
-              videoCount.toString() +
-              " Videos",
-          "random url",
-          rng.nextInt(2) == 0 ? false : true,
-          m));
+        responseJson[i].collection_id, "", responseJson[i].name,
+        false,
+        m,
+      ));
     }
 
     // TODO: Save and load from disk if network is unavailable

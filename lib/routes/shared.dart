@@ -1,4 +1,8 @@
-import 'dart:math';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math' as math;
+import 'package:http/http.dart' as http;
+import 'dart:developer';
 
 import 'package:aperturama/routes/collections_list.dart';
 import 'package:aperturama/routes/media_list.dart';
@@ -8,6 +12,7 @@ import 'package:aperturama/utils/main_drawer.dart';
 import 'package:aperturama/utils/media.dart';
 
 import '../utils/main_drawer.dart';
+import '../utils/user.dart';
 
 class Shared extends StatefulWidget {
   const Shared({Key? key}) : super(key: key);
@@ -26,46 +31,98 @@ class _SharedState extends State<Shared> {
   Future<MediaCollectionsLists> _getSharedList() async {
     List<Media> media = [];
 
-    // For now, make up urls
-    for (int i = 0; i < 17; i++) {
-      media.add(Media(
-        media.length.toString(), MediaType.photo,
-        'https://picsum.photos/seed/' + media.length.toString() + '/256',
-        'https://picsum.photos/seed/' + media.length.toString() + '/4096',
-      ));
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
+          headers: {
+            HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+          });
+
+      if(resp.statusCode != 200) {
+        log("Media listing failed: Code " + resp.statusCode.toString());
+      } else {
+        log(resp.body);
+        final responseJson = jsonDecode(resp.body);
+        log(resp.body);
+
+        // For each media item we got
+        for (int i = 0; i < responseJson.length; i++) {
+          media.add(Media(
+            responseJson[i].media_id, MediaType.photo,
+            serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/thumbnail',
+            serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/media',
+          ));
+        }
+      }
+
+    } on SocketException {
+      log("Media listing failed: Socket exception");
     }
+
 
     List<Collection> collections = [];
 
-    // For now, make up some collections
-    var rng = Random();
-    int numCollections = 2;
+    // Send a request to the backend
+    try {
+      resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections'),
+          headers: {
+            HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+          });
 
-    for (int i = 0; i < numCollections; i++) {
-      int photoCount = rng.nextInt(100) + 10;
-      int videoCount = rng.nextInt(100) + 10;
+      if(resp.statusCode != 200) {
+        log("Collection listing failed: Code " + resp.statusCode.toString());
+      } else {
 
-      List<Media> p = [];
-      for (int k = 1; k <= photoCount; k++) {
-        p.add(Media(
-            k.toString(), MediaType.photo,
-            'https://picsum.photos/seed/' +
-                (i * numCollections + k).toString() +
-                '/256',
-            'https://picsum.photos/seed/' +
-                (i * numCollections + k).toString() +
-                '/4096'));
+        log(resp.body);
+        final responseJson = jsonDecode(resp.body);
+        log(responseJson);
+
+        // For each collection item we got
+        for (int i = 0; i < responseJson.length; i++) {
+          // Find all the photos
+          // Send a request to the backend
+          List<Media> m = [];
+          try {
+            resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + responseJson.collection_id),
+                headers: {
+                  HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+                });
+
+            if(resp.statusCode != 200) {
+              log("Collection media listing failed: Code " + resp.statusCode.toString());
+            } else {
+              log(resp.body);
+              final responseJson2 = jsonDecode(resp.body);
+              log(responseJson2);
+
+              final cmedia = responseJson2.media;
+              for (int k = 0; k < cmedia.length; k++) {
+                m.add(Media(
+                  cmedia[i].media_id, MediaType.photo,
+                  serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/thumbnail',
+                  serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/media',
+                ));
+              }
+
+              // Save the collection
+              collections.add(Collection(
+                responseJson[i].collection_id, "", responseJson[i].name,
+                false,
+                m,
+              ));
+            }
+          } on SocketException {
+            log("Collection media listing failed: Socket exception");
+          }
+
+        }
       }
 
-      collections.add(Collection(
-          "Collection " + (i + 1).toString(),
-          photoCount.toString() +
-              " Photos, " +
-              videoCount.toString() +
-              " Videos",
-          "random url",
-          rng.nextInt(2) == 0 ? false : true,
-          p));
+    } on SocketException {
+      log("Collection listing failed: Socket exception");
     }
 
     // TODO: Save and load from disk if network is unavailable
@@ -103,19 +160,12 @@ class _SharedState extends State<Shared> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-
     // Set up the initial grid sizing
     // TODO: This doesn't reload when a web browser's size is changed, should probably be fixed
     if (_gridSize == 0 && _gridSizeMax == 0) {
       double width = MediaQuery.of(context).size.width;
-      _gridSize = max(4, (width / 200.0).round());
-      _gridSizeMax = max(8, (width / 100.0).round());
+      _gridSize = math.max(4, (width / 200.0).round());
+      _gridSizeMax = math.max(8, (width / 100.0).round());
       debugPrint('$width $_gridSize $_gridSizeMax');
     }
 

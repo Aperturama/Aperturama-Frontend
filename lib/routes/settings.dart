@@ -2,6 +2,8 @@ import 'package:aperturama/utils/main_drawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/user.dart';
+
 class AppSettings extends StatefulWidget {
   const AppSettings({Key? key}) : super(key: key);
 
@@ -11,8 +13,36 @@ class AppSettings extends StatefulWidget {
 
 class _AppSettingsState extends State<AppSettings> {
   final _formKey = GlobalKey<FormState>();
-  String collectionName = '';
+  String firstName = '';
+  String lastName = '';
+  String email = '';
+  String password = '';
   bool enableSharing = true;
+  bool initialDataPending = true;
+
+  void _populateInfoCached() async {
+    firstName = await User.getFirstName();
+    lastName = await User.getLastName();
+    email = await User.getEmail();
+    initialDataPending = false;
+    setState(() {});
+  }
+
+  void _populateInfoRefresh() async {
+    await User.getAccountInfo();
+    firstName = await User.getFirstName();
+    lastName = await User.getLastName();
+    email = await User.getEmail();
+    setState(() {});
+  }
+
+  // Load info on first load
+  @override
+  void initState() {
+    super.initState();
+    _populateInfoCached();
+    _populateInfoRefresh();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +87,7 @@ class _AppSettingsState extends State<AppSettings> {
                               ),
                               onChanged: (value) {
                                 setState(() {
-                                  collectionName = value;
+                                  firstName = value;
                                 });
                               },
                             ),
@@ -71,7 +101,7 @@ class _AppSettingsState extends State<AppSettings> {
                               ),
                               onChanged: (value) {
                                 setState(() {
-                                  collectionName = value;
+                                  lastName = value;
                                 });
                               },
                             ),
@@ -79,9 +109,6 @@ class _AppSettingsState extends State<AppSettings> {
                         ],
                       ),
                       const Divider(),
-                      const ListTile(
-                        title: Text("Email"),
-                      ),
                       TextFormField(
                         decoration: const InputDecoration(
                           filled: true,
@@ -89,35 +116,59 @@ class _AppSettingsState extends State<AppSettings> {
                           labelText: 'Email Address',
                         ),
                         onChanged: (value) {
-                          collectionName = value;
+                          email = value;
                         },
                       ),
                       const Divider(),
-                      const ListTile(
-                        title: Text("Password (if changing)"),
-                      ),
                       TextFormField(
                         decoration: const InputDecoration(
                           filled: true,
                           hintText: 'Password',
-                          labelText: 'Password',
+                          labelText: 'Password (if changing)',
                         ),
                         onChanged: (value) {
-                          collectionName = value;
+                          password = value;
                         },
                       ),
                       const Divider(),
                       Center(
                         child: ElevatedButton(
                           child: const Text('Save Changes'),
-                          onPressed: () {},
+                          onPressed: () async {
+                            bool success = await User.updateAccountInfo(firstName, lastName, email, password);
+                            if (success) {
+                              // Updating succeeded
+                              // Show a snackbar message
+                              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Account info updated successfully!')),
+                              );
+                              _populateInfoRefresh();
+                            } else {
+                              // Updating failed
+                              // Show a snackbar message
+                              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Failed to update account info.')),
+                              );
+                            }
+                          },
                         ),
                       ),
                       Center(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(primary: Colors.red),
                             child: const Text('Log Out'),
-                          onPressed: () {},
+                          onPressed: () {
+                            User.logOut();
+                            // Show a snackbar message
+                            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Logged out successfully!')),
+                            );
+                            // Redirect to login page
+                            Navigator.pushReplacementNamed(context, '/');
+                          },
                         ),
                       ),
                     ],

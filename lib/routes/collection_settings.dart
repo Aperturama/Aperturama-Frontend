@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:aperturama/utils/media.dart';
+import 'package:flutter/services.dart';
+
 
 class CollectionSettings extends StatefulWidget {
   const CollectionSettings(this.collection, {Key? key}) : super(key: key);
@@ -14,7 +16,8 @@ class _CollectionSettingsState extends State<CollectionSettings> {
 
   final _formKey = GlobalKey<FormState>();
   String collectionName = '';
-  bool enableSharing = true;
+  String sharingLink = '';
+  bool sharingEnabled = true;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +55,7 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                             hintText: 'Enter a name for the collection.',
                             labelText: 'Collection Name',
                           ),
+                          initialValue: collectionName,
                           onChanged: (value) {
                             setState(() {
                               collectionName = value;
@@ -68,10 +72,10 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                             Text('Enable sharing',
                                 style: Theme.of(context).textTheme.bodyText1),
                             Switch(
-                              value: enableSharing,
+                              value: sharingEnabled,
                               onChanged: (enabled) {
                                 setState(() {
-                                  enableSharing = enabled;
+                                  sharingEnabled = enabled;
                                 });
                               },
                             ),
@@ -83,8 +87,10 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                             hintText: 'A link you can share with others to access this collection.',
                             labelText: 'Sharing Link:',
                           ),
+                          readOnly: true,
+                          initialValue: sharingLink,
                           onChanged: (value) {
-                            collectionName = value;
+                            sharingLink = value;
                           },
                         ),
                         Row(
@@ -92,7 +98,7 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                             TextButton(
                               child: const Text('Copy Link'),
                               onPressed: () {
-
+                                Clipboard.setData(ClipboardData(text: sharingLink));
                               },
                             ),
                             TextButton(

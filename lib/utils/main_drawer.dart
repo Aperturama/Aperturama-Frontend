@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 
 import 'package:aperturama/utils/user.dart';
 import 'package:flutter/material.dart';
@@ -25,15 +27,32 @@ class _MainDrawerState extends State<MainDrawer> {
   void _populateStats() async {
     String jwt = await User.getJWT();
     String serverAddress = await User.getServerAddress();
-    http.Response resp = await http.get(Uri.parse(serverAddress + '/api/v1/stats'), headers: {"Authorization": "Bearer " + jwt});
-    Map<String, String> data = jsonDecode(resp.body);
-    photos = int.parse(data["photos"] ?? "0");
-    sharedItems = int.parse(data["sharedItems"] ?? "0");
-    storageUsed = int.parse(data["storageUsed"] ?? "0");
-    storageUsedUnit = data["storageUsedUnit"] ?? "B";
-    storageMax = int.parse(data["storageMax"] ?? "0");
-    storageMaxUnit = data["storageMaxUnit"] ?? "B";
-    setState(() {});
+
+
+    http.Response resp;
+    try {
+      resp = await http.get(Uri.parse(serverAddress + '/api/v1/user/stats'),
+          headers: {"Authorization": "Bearer " + jwt});
+      if(resp.statusCode == 200) {
+        // Success, do a login now
+        log("Main Drawer success");
+        Map<String, String> data = jsonDecode(resp.body);
+
+        photos = int.parse(data["photos"] ?? "0");
+        sharedItems = int.parse(data["sharedItems"] ?? "0");
+        storageUsed = int.parse(data["storageUsed"] ?? "0");
+        storageUsedUnit = data["storageUsedUnit"] ?? "B";
+        storageMax = int.parse(data["storageMax"] ?? "0");
+        storageMaxUnit = data["storageMaxUnit"] ?? "B";
+        setState(() {});
+
+      } else {
+        log("Non 200 Main Drawer status code: " + resp.statusCode.toString());
+      }
+
+    } on SocketException {
+      log("Main Drawer socket exception");
+    }
   }
 
   // Load info on first load

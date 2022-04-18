@@ -1,4 +1,8 @@
-import 'dart:math';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math' as math;
+import 'package:http/http.dart' as http;
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +11,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aperturama/utils/media.dart';
 
 import '../utils/main_drawer.dart';
+import '../utils/user.dart';
 
 class MediaList extends StatefulWidget {
   const MediaList({Key? key}) : super(key: key);
@@ -25,12 +30,36 @@ class _MediaListState extends State<MediaList> {
   Future<List<Media>> _getMediaList() async {
     List<Media> media = [];
 
-    // For now, make up urls
-    for (int i = 0; i < 512; i++) {
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      log("JWT: " + jwt);
+      resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+        });
+    } on SocketException {
+      log("Media listing failed: Socket exception");
+      return media;
+    }
+
+    if(resp.statusCode != 200) {
+      log("Media listing failed: Code " + resp.statusCode.toString());
+      return media;
+    }
+
+    log(resp.body);
+    final responseJson = jsonDecode(resp.body);
+    log(resp.body);
+
+    // For each media item we got
+    for (int i = 0; i < responseJson.length; i++) {
       media.add(Media(
-        media.length.toString(), MediaType.photo,
-        'https://picsum.photos/seed/' + media.length.toString() + '/256',
-        'https://picsum.photos/seed/' + media.length.toString() + '/4096',
+        responseJson[i].media_id, MediaType.photo,
+        serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/thumbnail',
+        serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/media',
       ));
     }
 
@@ -78,8 +107,8 @@ class _MediaListState extends State<MediaList> {
     // TODO: This doesn't reload when a web browser's size is changed, should probably be fixed
     if (_gridSize == 0 && _gridSizeMax == 0) {
       double width = MediaQuery.of(context).size.width;
-      _gridSize = max(4, (width / 200.0).round());
-      _gridSizeMax = max(8, (width / 100.0).round());
+      _gridSize = math.max(4, (width / 200.0).round());
+      _gridSizeMax = math.max(8, (width / 100.0).round());
       debugPrint('$width $_gridSize $_gridSizeMax');
     }
 
