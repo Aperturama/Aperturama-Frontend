@@ -1,4 +1,6 @@
+import 'package:aperturama/routes/collection_settings.dart';
 import 'package:aperturama/routes/login.dart';
+import 'package:aperturama/routes/media_settings.dart';
 import 'package:aperturama/routes/media_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:aperturama/routes/auto_upload.dart';
@@ -30,8 +32,10 @@ class MyApp extends StatelessWidget {
         '/': (context) => const AppLogin(),
         '/media': (context) => const MediaList(),
         '/media_viewer': (context) => const MediaViewer(),
+        '/media_settings': (context) => const MediaSettings(),
         '/collections': (context) => const Collections(),
         '/collection_viewer': (context) => const CollectionViewer(),
+        '/collection_settings': (context) => const CollectionSettings(),
         '/shared': (context) => const Shared(),
         '/auto_upload': (context) => const AutoUpload(),
         '/settings': (context) => const AppSettings(),

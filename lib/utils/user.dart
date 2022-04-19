@@ -180,24 +180,27 @@ class User {
     try {
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/user'),
         headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },);
+
+      if(resp.statusCode != 200) {
+        log("getAccountInfo Non 200 status code: " + resp.statusCode.toString());
+        return false;
+
+      } else {
+        final data = jsonDecode(resp.body);
+        log(data.toString());
+
+        // Success, save info
+        await prefs.setString("email", data["email"]);
+        await prefs.setString("firstName", data["first_name"]);
+        await prefs.setString("lastName", data["last_name"]);
+        return true;
+      }
+
     } on SocketException {
       log("getAccountInfo socket exception");
       return false;
     }
 
-    if(resp.statusCode != 200) {
-      log("getAccountInfo Non 200 status code: " + resp.statusCode.toString());
-      return false;
-    }
-
-    final data = jsonDecode(resp.body);
-    log(data.toString());
-
-    // Success, save info
-    await prefs.setString("email", data["email"]);
-    await prefs.setString("firstName", data["first_name"]);
-    await prefs.setString("lastName", data["last_name"]);
-    return true;
   }
 
   static void logOut() async {

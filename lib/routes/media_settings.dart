@@ -1,36 +1,46 @@
 import 'package:aperturama/utils/media.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+import 'package:flutter/services.dart';
 
 class MediaSettings extends StatefulWidget {
-  const MediaSettings({Key? key, required this.media}) : super(key: key);
-
-  final Media media;
+  const MediaSettings({Key? key}) : super(key: key);
 
   @override
   State<MediaSettings> createState() => _MediaSettingsState();
 }
 
 class _MediaSettingsState extends State<MediaSettings> {
-
   final _formKey = GlobalKey<FormState>();
   String collectionName = '';
   bool enableSharing = true;
+  late final Media media;
+
+  var sharingLinkController = TextEditingController();
+  var sharingUserController = TextEditingController();
+  var sharingCanEdit = false;
+
+  // Load info on first load
+  @override
+  void initState() {
+    super.initState();
+
+    // Take in information about the current media given as args,
+    // or set it to no media if the args are invalid for some reason
+    if (ModalRoute.of(context)!.settings.arguments != null) {
+      media = ModalRoute.of(context)!.settings.arguments as Media;
+    } else {
+      media = Media("", MediaType.photo, "", "");
+      // Todo: Probably navigate back to the /photos page
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return AlertDialog(
       content: SizedBox(
-        //HERE THE SIZE YOU WANT
         height: MediaQuery.of(context).size.height / 1.2,
         width: MediaQuery.of(context).size.width / 1.1,
-        //your content
         child: Form(
           key: _formKey,
           child: Scrollbar(
@@ -46,22 +56,36 @@ class _MediaSettingsState extends State<MediaSettings> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         ListTile(
-                          title: Text("Collection Name:"),
-                        ),
-                        TextFormField(
-                          decoration: const InputDecoration(
-                            filled: true,
-                            hintText: 'Enter a name for the collection.',
-                            labelText: 'Collection Name',
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              collectionName = value;
-                            });
-                          },
+                          horizontalTitleGap: 0,
+                          title: Text(p.basename(media.localPath)),
+                          contentPadding:
+                              const EdgeInsets.only(left: 14, bottom: 10),
+                          subtitle: Text(media.localPath),
                         ),
                         ListTile(
-                          title: Text("Sharing Settings:"),
+                          horizontalTitleGap: 0,
+                          title: Text("Date Taken: " +
+                              media.uploadedTimestamp.year.toString() +
+                              "/" +
+                              media.uploadedTimestamp.month.toString() +
+                              "/" +
+                              media.uploadedTimestamp.day.toString() +
+                              " " +
+                              ((media.uploadedTimestamp.hour + 11) % 12 + 1)
+                                  .toString() +
+                              ":" +
+                              media.uploadedTimestamp.minute
+                                  .toString()
+                                  .padLeft(2, '0') +
+                              ((media.uploadedTimestamp.hour >= 12)
+                                  ? " pm"
+                                  : " am")),
+                          contentPadding:
+                              const EdgeInsets.only(left: 14, bottom: 10),
+                          subtitle: Text(media.localPath),
+                        ),
+                        const ListTile(
+                          title: Text("Sharing Settings"),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,10 +94,10 @@ class _MediaSettingsState extends State<MediaSettings> {
                             Text('Enable sharing',
                                 style: Theme.of(context).textTheme.bodyText1),
                             Switch(
-                              value: enableSharing,
-                              onChanged: (enabled) {
+                              value: media.shared,
+                              onChanged: (value) {
                                 setState(() {
-                                  enableSharing = enabled;
+                                  media.shared = value;
                                 });
                               },
                             ),
@@ -82,95 +106,108 @@ class _MediaSettingsState extends State<MediaSettings> {
                         TextFormField(
                           decoration: const InputDecoration(
                             filled: true,
-                            hintText: 'A link you can share with others to access this collection.',
-                            labelText: 'Sharing Link:',
+                            labelText: 'Sharing Link',
                           ),
-                          onChanged: (value) {
-                            collectionName = value;
-                          },
+                          readOnly: true,
+                          initialValue: media.sharingLink,
+                          controller: sharingLinkController,
                         ),
-                        Row(
-                          children: [
-                            TextButton(
-                              child: const Text('Copy Link'),
-                              onPressed: () {
-
-                              },
-                            ),
-                            TextButton(
-                              child: const Text('Regenerate'),
-                              onPressed: () {
-
-                              },
-                            ),
-                          ]
-                        ),
-                        DropdownButton<String>(
-                          value: "Username here", //dropdownValue
-                          icon: const Icon(Icons.arrow_downward),
-                          elevation: 16,
-                          isExpanded: true,
-                          style: const TextStyle(color: Colors.blue),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.blue,
+                        Row(children: [
+                          TextButton(
+                            child: const Text('Copy Link'),
+                            onPressed: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: media.sharingLink));
+                            },
                           ),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              //dropdownValue = newValue!;
-                            });
-                          },
-                          items: <String>['Username here', 'Two', 'Free', 'Four']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
+                          TextButton(
+                            child: const Text('Regenerate'),
+                            onPressed: () async {
+                              await media.regenerateSharedLink();
+                              sharingLinkController.text = media.sharingLink;
+                            },
+                          ),
+                        ]),
+                        ListView.builder(
+                          itemBuilder: (BuildContext context, int index) {
+                            return Row(
+                              children: [
+                                Text(media.sharingUsers[index]),
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: () async {
+                                    if (await media.unshareWithUser(media.sharingUsers[index])) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text('Media unshared with ' +
+                                                  media.sharingUsers[index] + '.')));
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text('Failed to unshare media with ' +
+                                                  media.sharingUsers[index] + '.')));
+                                    }
+                                  },
+                                ),
+                              ],
                             );
-                          }).toList(),
-                        ),
-                        Row(
-                          children: [
-                            TextButton(
-                              child: const Text('Shared'),
-                              onPressed: () {
-
-                              },
-                            ),
-                            TextButton(
-                              child: const Text('Editing Allowed'),
-                              onPressed: () {
-
-                              },
-                            ),
-                          ]
-                        ),
-                        ListTile(
-                          title: Text("Manage Media:"),
-                        ),
-                        Row(
-                            children: [
-                              TextButton(
-                                child: const Text('Add'),
-                                onPressed: () {
-
-                                },
-                              ),
-                              TextButton(
-                                child: const Text('Delete'),
-                                onPressed: () {
-
-                                },
-                              ),
-                            ]
-                        ),
-                        TextButton(
-                            style: TextButton.styleFrom(primary: Colors.red),
-                          child: const Text('Delete Collection'),
-
-                          onPressed: () {
-
                           },
-
+                          itemCount: media.sharingUsers.length,
+                        ),
+                        Row(children: [
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              filled: true,
+                              hintText: "User's email",
+                              labelText: 'Share to new user',
+                            ),
+                            controller: sharingUserController,
+                          ),
+                          Text('Can Edit:',
+                              style: Theme.of(context).textTheme.bodyText1),
+                          Switch(
+                            value: sharingCanEdit,
+                            onChanged: (value) {
+                              setState(() {
+                                sharingCanEdit = value;
+                              });
+                            },
+                          ),
+                          TextButton(
+                            child: const Text('Share'),
+                            onPressed: () async {
+                              if(await media.shareWithUser(sharingUserController.text)) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                    content: Text('Media shared with ' +
+                                        sharingUserController.text + '.')));
+                                sharingUserController.text = "";
+                                setState(() {});
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                    content: Text('Failed to share media with ' +
+                                        sharingUserController.text + '.')));
+                              }
+                            },
+                          ),
+                        ]),
+                        TextButton(
+                          style: TextButton.styleFrom(primary: Colors.red),
+                          child: const Text('Delete Media'),
+                          onPressed: () async {
+                            if (await media.delete()) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Media deleted.')));
+                              Navigator.pop(context);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Failed to delete media.')));
+                            }
+                          },
                         ),
                       ],
                     ),

@@ -2,38 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:aperturama/utils/media.dart';
 import 'package:flutter/services.dart';
 
-
 class CollectionSettings extends StatefulWidget {
-  const CollectionSettings(this.collection, {Key? key}) : super(key: key);
-
-  final Collection collection;
+  const CollectionSettings({Key? key}) : super(key: key);
 
   @override
   State<CollectionSettings> createState() => _CollectionSettingsState();
 }
 
 class _CollectionSettingsState extends State<CollectionSettings> {
-
   final _formKey = GlobalKey<FormState>();
-  String collectionName = '';
-  String sharingLink = '';
   bool sharingEnabled = true;
+  late final Collection collection;
+
+  var sharingLinkController = TextEditingController();
+  var sharingUserController = TextEditingController();
+  var sharingCanEdit = false;
+
+  // Load info on first load
+  @override
+  void initState() {
+    super.initState();
+
+    // Take in information about the current media given as args,
+    // or set it to no media if the args are invalid for some reason
+    if (ModalRoute.of(context)!.settings.arguments != null) {
+      collection = ModalRoute.of(context)!.settings.arguments as Collection;
+    } else {
+      collection = Collection("", "", "", false, []);
+      // Todo: Probably navigate back to the /photos page
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return AlertDialog(
       content: SizedBox(
-        //HERE THE SIZE YOU WANT
         height: MediaQuery.of(context).size.height / 1.2,
         width: MediaQuery.of(context).size.width / 1.1,
-        //your content
         child: Form(
           key: _formKey,
           child: Scrollbar(
@@ -55,10 +60,10 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                             hintText: 'Enter a name for the collection.',
                             labelText: 'Collection Name',
                           ),
-                          initialValue: collectionName,
+                          initialValue: collection.name,
                           onChanged: (value) {
                             setState(() {
-                              collectionName = value;
+                              collection.name = value;
                             });
                           },
                         ),
@@ -69,13 +74,12 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('Enable sharing',
-                                style: Theme.of(context).textTheme.bodyText1),
+                            Text('Enable sharing', style: Theme.of(context).textTheme.bodyText1),
                             Switch(
-                              value: sharingEnabled,
-                              onChanged: (enabled) {
+                              value: collection.shared,
+                              onChanged: (value) {
                                 setState(() {
-                                  sharingEnabled = enabled;
+                                  collection.shared = value;
                                 });
                               },
                             ),
@@ -84,97 +88,120 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                         TextFormField(
                           decoration: const InputDecoration(
                             filled: true,
-                            hintText: 'A link you can share with others to access this collection.',
-                            labelText: 'Sharing Link:',
+                            labelText: 'Sharing Link',
                           ),
                           readOnly: true,
-                          initialValue: sharingLink,
-                          onChanged: (value) {
-                            sharingLink = value;
-                          },
+                          initialValue: collection.sharingLink,
+                          controller: sharingLinkController,
                         ),
-                        Row(
-                          children: [
-                            TextButton(
-                              child: const Text('Copy Link'),
-                              onPressed: () {
-                                Clipboard.setData(ClipboardData(text: sharingLink));
-                              },
-                            ),
-                            TextButton(
-                              child: const Text('Regenerate'),
-                              onPressed: () {
-
-                              },
-                            ),
-                          ]
-                        ),
-                        DropdownButton<String>(
-                          value: "Username here", //dropdownValue
-                          icon: const Icon(Icons.arrow_downward),
-                          elevation: 16,
-                          isExpanded: true,
-                          style: const TextStyle(color: Colors.blue),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.blue,
+                        Row(children: [
+                          TextButton(
+                            child: const Text('Copy Link'),
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: collection.sharingLink));
+                            },
                           ),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              //dropdownValue = newValue!;
-                            });
-                          },
-                          items: <String>['Username here', 'Two', 'Free', 'Four']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
+                          TextButton(
+                            child: const Text('Regenerate'),
+                            onPressed: () async {
+                              await collection.regenerateSharedLink();
+                              sharingLinkController.text = collection.sharingLink;
+                            },
+                          ),
+                        ]),
+                        // List of people shared with
+                        ListView.builder(
+                          itemBuilder: (BuildContext context, int index) {
+                            return Row(
+                              children: [
+                                Text(collection.sharingUsers[index]),
+                                Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
+                                Switch(
+                                  value: sharingCanEdit,
+                                  onChanged: (value) async {
+                                    if (await collection.shareWithUser(sharingUserController.text, sharingCanEdit)) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content: Text('Media shared with ' + sharingUserController.text + '.')));
+                                      sharingUserController.text = "";
+                                      setState(() {});
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content:
+                                              Text('Failed to share media with ' + sharingUserController.text + '.')));
+                                    }
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: () async {
+                                    if (await collection.unshareWithUser(collection.sharingUsers[index])) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content: Text(
+                                              'Collection unshared with ' + collection.sharingUsers[index] + '.')));
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content: Text('Failed to unshare collection with ' +
+                                              collection.sharingUsers[index] +
+                                              '.')));
+                                    }
+                                  },
+                                ),
+                              ],
                             );
-                          }).toList(),
+                          },
+                          itemCount: collection.sharingUsers.length,
                         ),
-                        Row(
-                          children: [
-                            TextButton(
-                              child: const Text('Shared'),
-                              onPressed: () {
-
-                              },
+                        // Adding a new person to share with
+                        Row(children: [
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              filled: true,
+                              hintText: "User's email",
+                              labelText: 'Share to new user',
                             ),
-                            TextButton(
-                              child: const Text('Editing Allowed'),
-                              onPressed: () {
-
-                              },
-                            ),
-                          ]
-                        ),
+                            controller: sharingUserController,
+                          ),
+                          Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
+                          Switch(
+                            value: sharingCanEdit,
+                            onChanged: (value) {
+                              setState(() {
+                                sharingCanEdit = value;
+                              });
+                            },
+                          ),
+                          TextButton(
+                            child: const Text('Share'),
+                            onPressed: () async {
+                              if (await collection.shareWithUser(sharingUserController.text, sharingCanEdit)) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Media shared with ' + sharingUserController.text + '.')));
+                                sharingUserController.text = "";
+                                setState(() {});
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    content: Text('Failed to share media with ' + sharingUserController.text + '.')));
+                              }
+                            },
+                          ),
+                        ]),
                         ListTile(
                           title: Text("Manage Media:"),
                         ),
-                        Row(
-                            children: [
-                              TextButton(
-                                child: const Text('Add'),
-                                onPressed: () {
-
-                                },
-                              ),
-                              TextButton(
-                                child: const Text('Delete'),
-                                onPressed: () {
-
-                                },
-                              ),
-                            ]
-                        ),
+                        Row(children: [
+                          TextButton(
+                            child: const Text('Add'),
+                            onPressed: () {},
+                          ),
+                          TextButton(
+                            child: const Text('Delete'),
+                            onPressed: () {},
+                          ),
+                        ]),
                         TextButton(
-                            style: TextButton.styleFrom(primary: Colors.red),
+                          style: TextButton.styleFrom(primary: Colors.red),
                           child: const Text('Delete Collection'),
-
-                          onPressed: () {
-
-                          },
-
+                          onPressed: () {},
                         ),
                       ],
                     ),

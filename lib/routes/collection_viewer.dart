@@ -96,19 +96,12 @@ class _CollectionViewerState extends State<CollectionViewer> {
                 trailing: TextButton(
                   child: const Text('Settings'),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        barrierDismissible: true,
-                        opaque: false,
-                        pageBuilder: (_, anim1, anim2) => CollectionSettings(collection),
-                      ),
-                    );
+                    Navigator.pushNamed(context, '/collection_settings', arguments: collection);
                   },
                 ),
               ),
               subtitle: Text(collection.information),
-              contentPadding: EdgeInsets.only(left: 14, bottom: 10),
+              contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
             ),
             Expanded(
               child: MediaGrid(collection.images, _gridSize),

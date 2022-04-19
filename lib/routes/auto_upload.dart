@@ -210,7 +210,7 @@ class _AutoUploadState extends State<AutoUpload> {
             var postUri = Uri.parse(serverAddress + '/api/v1/media');
             var request = http.MultipartRequest("POST", postUri);
             request.headers['authorization'] = 'Bearer ' + jwt;
-            request.files.add(http.MultipartFile.fromBytes('file',
+            request.files.add(http.MultipartFile.fromBytes('mediafile',
                 await File.fromUri(f.uri).readAsBytes(),
                 contentType: httpParser.MediaType('image', extension)));
 
@@ -239,7 +239,6 @@ class _AutoUploadState extends State<AutoUpload> {
             log("Media hash check failed: Code " + resp.statusCode.toString());
             continue;
           }
-
 
         } else {
           log("Non-image found");

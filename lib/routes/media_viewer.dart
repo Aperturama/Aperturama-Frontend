@@ -22,19 +22,25 @@ class MediaViewer extends StatefulWidget {
 
 class _MediaViewerState extends State<MediaViewer> {
   double _maxScale = 1;
+  late final Media media;
 
+  // Load info on first load
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+
     // Take in information about the current media given as args,
     // or set it to no media if the args are invalid for some reason
-    final Media media;
     if(ModalRoute.of(context)!.settings.arguments != null) {
       media = ModalRoute.of(context)!.settings.arguments as Media;
     } else {
       media = Media("", MediaType.photo, "", "");
       // Todo: Probably navigate back to the /photos page
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
@@ -46,15 +52,7 @@ class _MediaViewerState extends State<MediaViewer> {
             IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    barrierDismissible: true,
-                    opaque: false,
-                    pageBuilder: (_, anim1, anim2) =>
-                        MediaSettings(media: media),
-                  ),
-                );
+                Navigator.pushNamed(context, '/media_settings', arguments: media);
               },
               tooltip: 'Media Information and Settings',
             ),
