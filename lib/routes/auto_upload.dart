@@ -9,8 +9,11 @@ import 'package:aperturama/utils/media.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart' as httpParser;
 
 import '../utils/main_drawer.dart';
+import '../utils/user.dart';
 
 class AutoUpload extends StatefulWidget {
   const AutoUpload({Key? key}) : super(key: key);
@@ -148,6 +151,19 @@ class _AutoUploadState extends State<AutoUpload> {
 
         // Check if there are any unknown photos
         // TODO: Make a bunch of HTTP requests to the backend server
+        // Send a request to the backend with the photo
+        String serverAddress = await User.getServerAddress();
+        var postUri = Uri.parse(serverAddress + '/api/v1/media');
+        var request = http.MultipartRequest("POST", postUri);
+        request.files.add(http.MultipartFile.fromBytes('file', await File.fromUri(f.uri).readAsBytes(), contentType: httpParser.MediaType('image', 'jpeg'))); // TODO: Dynamic filetype
+
+        request.send().then((response) {
+          if (response.statusCode == 200) {
+            log("Uploaded " + f.uri.toString());
+          } else {
+            log("Failed to upload " + f.uri.toString());
+          }
+        });
 
         // Add them to the recently uploaded list
         // TODO: Only if newly uploaded
