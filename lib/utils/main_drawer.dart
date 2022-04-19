@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:aperturama/utils/user.dart';
 import 'package:flutter/material.dart';
@@ -16,34 +17,44 @@ class MainDrawer extends StatefulWidget {
 
 class _MainDrawerState extends State<MainDrawer> {
 
-  int photos = 0;
-  int collections = 0;
-  int sharedItems = 0;
+  int numPhotos = 0;
+  int numCollections = 0;
+  int numSharedItems = 0;
   int storageUsed = 0;
-  String storageUsedUnit = "";
-  int storageMax = 0;
-  String storageMaxUnit = "";
+  int storageTotal = 0;
+  String firstName = "";
+  bool initialDataPending = true;
+
+  // Sourced from https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
+  static String formatBytes(int bytes, int decimals) {
+    if (bytes <= 0) return "0B";
+    const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    var i = (math.log(bytes) / math.log(1024)).floor();
+    return ((bytes / math.pow(1024, i)).toStringAsFixed(decimals)) +
+        '' + suffixes[i];
+  }
 
   void _populateStats() async {
     String jwt = await User.getJWT();
     String serverAddress = await User.getServerAddress();
-
+    firstName = await User.getFirstName();
 
     http.Response resp;
     try {
-      resp = await http.get(Uri.parse(serverAddress + '/api/v1/user/stats'),
+      resp = await http.get(Uri.parse(serverAddress + '/api/v1/user/statistics'),
           headers: {"Authorization": "Bearer " + jwt});
       if(resp.statusCode == 200) {
         // Success, do a login now
         log("Main Drawer success");
-        Map<String, String> data = jsonDecode(resp.body);
+        Map<String, dynamic> data = jsonDecode(resp.body);
+        log(data.toString());
 
-        photos = int.parse(data["photos"] ?? "0");
-        sharedItems = int.parse(data["sharedItems"] ?? "0");
-        storageUsed = int.parse(data["storageUsed"] ?? "0");
-        storageUsedUnit = data["storageUsedUnit"] ?? "B";
-        storageMax = int.parse(data["storageMax"] ?? "0");
-        storageMaxUnit = data["storageMaxUnit"] ?? "B";
+        numPhotos = data["n_media"] ?? 0;
+        numCollections = data["n_collections"] ?? 0;
+        numSharedItems = data["n_shared"] ?? 0;
+        storageUsed = data["bytes_used"] ?? 0;
+        storageTotal = data["bytes_total"] ?? 0;
+        initialDataPending = false;
         setState(() {});
 
       } else {
@@ -132,19 +143,23 @@ class _MainDrawerState extends State<MainDrawer> {
                 ),
               ),
               const Divider(height: 1.0),
-              ListView( // Stats at the bottom of the screen
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                children: [
-                  statPad(),
-                  stat('Logged in as Hunter'),
-                  stat('1268 Photos'),
-                  stat('13 Collections'),
-                  stat('6 Shared Items'),
-                  stat('30GB / 2TB Used'),
-                  statPad(),
-                ],
-              ),
+              if (initialDataPending)
+                const CircularProgressIndicator()
+              else
+                ListView( // Stats at the bottom of the screen
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  children: [
+                    statPad(),
+                    stat('Logged in as ' + firstName),
+                    stat(numPhotos.toString() + ' Photos'),
+                    stat(numCollections.toString() + ' Collections'),
+                    stat(numSharedItems.toString() + ' Shared Items'),
+                    stat(formatBytes(storageUsed, 0) + " Used / " +
+                         formatBytes(storageTotal, 0) + " Total"),
+                    statPad(),
+                  ],
+                ),
             ],
           )),
     );

@@ -133,10 +133,11 @@ class User {
 
   }
 
-  static Future<bool> updateAccountInfo(String firstName, String lastName, String email, String password) async {
+  static Future<bool> setAccountInfo(String firstName, String lastName, String email, String password) async {
     // Create storages
     final prefs = await SharedPreferences.getInstance();
     String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
 
     // Send a request to the backend with the updated info info
     Map<String, String> accountInfo;
@@ -147,8 +148,9 @@ class User {
     }
     http.Response resp;
     try {
-      resp = await http.post(Uri.parse(serverAddress + '/api/v1/user/update'),
-        body: accountInfo,
+      resp = await http.put(Uri.parse(serverAddress + '/api/v1/user'),
+          headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
+          body: accountInfo,
       );
     } on SocketException {
       log("updateAccountInfo socket exception");
@@ -171,11 +173,13 @@ class User {
     // Create storages
     final prefs = await SharedPreferences.getInstance();
     String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
 
     // Send a request to the backend to get the updated info
     http.Response resp;
     try {
-      resp = await http.get(Uri.parse(serverAddress + '/api/v1/user'));
+      resp = await http.get(Uri.parse(serverAddress + '/api/v1/user'),
+        headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },);
     } on SocketException {
       log("getAccountInfo socket exception");
       return false;
@@ -187,11 +191,12 @@ class User {
     }
 
     final data = jsonDecode(resp.body);
+    log(data.toString());
 
     // Success, save info
-    await prefs.setString("email", data.email);
-    await prefs.setString("firstName", data.first_name);
-    await prefs.setString("lastName", data.last_name);
+    await prefs.setString("email", data["email"]);
+    await prefs.setString("firstName", data["first_name"]);
+    await prefs.setString("lastName", data["last_name"]);
     return true;
   }
 

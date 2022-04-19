@@ -17,10 +17,10 @@ class _AppSettingsState extends State<AppSettings> {
   String lastName = '';
   String email = '';
   String password = '';
-  bool enableSharing = true;
   bool initialDataPending = true;
 
-  void _populateInfoCached() async {
+  void _populateInfo() async {
+    await User.getAccountInfo(); // Refresh cache
     firstName = await User.getFirstName();
     lastName = await User.getLastName();
     email = await User.getEmail();
@@ -28,20 +28,116 @@ class _AppSettingsState extends State<AppSettings> {
     setState(() {});
   }
 
-  void _populateInfoRefresh() async {
-    await User.getAccountInfo();
-    firstName = await User.getFirstName();
-    lastName = await User.getLastName();
-    email = await User.getEmail();
-    setState(() {});
-  }
-
   // Load info on first load
   @override
   void initState() {
     super.initState();
-    _populateInfoCached();
-    _populateInfoRefresh();
+    _populateInfo();
+  }
+
+  List<Widget> settingsForm(context) {
+    return [
+      Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              decoration: const InputDecoration(
+                filled: true,
+                hintText: 'First Name',
+                labelText: 'First Name',
+              ),
+              initialValue: firstName,
+              onChanged: (value) {
+                setState(() {
+                  firstName = value;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: TextFormField(
+              decoration: const InputDecoration(
+                filled: true,
+                hintText: 'Last Name',
+                labelText: 'Last Name',
+              ),
+              initialValue: lastName,
+              onChanged: (value) {
+                setState(() {
+                  lastName = value;
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+      const Divider(),
+      TextFormField(
+        decoration: const InputDecoration(
+          filled: true,
+          hintText: 'Email Address',
+          labelText: 'Email Address',
+        ),
+        initialValue: email,
+        onChanged: (value) {
+          email = value;
+        },
+      ),
+      const Divider(),
+      TextFormField(
+        decoration: const InputDecoration(
+          filled: true,
+          hintText: 'Password',
+          labelText: 'Password (if changing)',
+        ),
+        onChanged: (value) {
+          password = value;
+        },
+      ),
+      const Divider(),
+      Center(
+        child: ElevatedButton(
+          child: const Text('Save Changes'),
+          onPressed: () async {
+            bool success =
+                await User.setAccountInfo(firstName, lastName, email, password);
+            if (success) {
+              // Updating succeeded
+              // Show a snackbar message
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Account info updated successfully!')),
+              );
+              _populateInfo();
+            } else {
+              // Updating failed
+              // Show a snackbar message
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Failed to update account info.')),
+              );
+            }
+          },
+        ),
+      ),
+      Center(
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(primary: Colors.red),
+          child: const Text('Log Out'),
+          onPressed: () {
+            User.logOut();
+            // Show a snackbar message
+            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Logged out successfully!')),
+            );
+            // Redirect to login page
+            Navigator.pushReplacementNamed(context, '/');
+          },
+        ),
+      )
+    ];
   }
 
   @override
@@ -73,104 +169,10 @@ class _AppSettingsState extends State<AppSettings> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const ListTile(
-                        title: Text("Your Name"),
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                filled: true,
-                                hintText: 'First Name',
-                                labelText: 'First Name',
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  firstName = value;
-                                });
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                filled: true,
-                                hintText: 'Last Name',
-                                labelText: 'Last Name',
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  lastName = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Divider(),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          filled: true,
-                          hintText: 'Email Address',
-                          labelText: 'Email Address',
-                        ),
-                        onChanged: (value) {
-                          email = value;
-                        },
-                      ),
-                      const Divider(),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          filled: true,
-                          hintText: 'Password',
-                          labelText: 'Password (if changing)',
-                        ),
-                        onChanged: (value) {
-                          password = value;
-                        },
-                      ),
-                      const Divider(),
-                      Center(
-                        child: ElevatedButton(
-                          child: const Text('Save Changes'),
-                          onPressed: () async {
-                            bool success = await User.updateAccountInfo(firstName, lastName, email, password);
-                            if (success) {
-                              // Updating succeeded
-                              // Show a snackbar message
-                              ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Account info updated successfully!')),
-                              );
-                              _populateInfoRefresh();
-                            } else {
-                              // Updating failed
-                              // Show a snackbar message
-                              ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Failed to update account info.')),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      Center(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(primary: Colors.red),
-                            child: const Text('Log Out'),
-                          onPressed: () {
-                            User.logOut();
-                            // Show a snackbar message
-                            ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Logged out successfully!')),
-                            );
-                            // Redirect to login page
-                            Navigator.pushReplacementNamed(context, '/');
-                          },
-                        ),
-                      ),
+                      if (initialDataPending)
+                        const CircularProgressIndicator()
+                      else
+                        ...settingsForm(context),
                     ],
                   ),
                 ),

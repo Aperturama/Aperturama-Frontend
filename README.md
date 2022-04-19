@@ -11,6 +11,7 @@
 - More animations (See https://docs.flutter.dev/cookbook/animation/page-route-animation, https://pub.dev/packages/simple_animations, https://flutter.github.io/samples/animations.html)
 - A splash screen (https://docs.flutter.dev/development/ui/advanced/splash-screen)
 - Proper looking name/app icon on Android
+- "No Media :(" or no collections messages  
 
 # References Used:
 https://docs.flutter.dev/

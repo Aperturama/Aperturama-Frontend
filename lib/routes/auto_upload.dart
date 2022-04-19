@@ -11,6 +11,10 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart' as httpParser;
+import 'package:path/path.dart' as p;
+import 'package:crypto/crypto.dart';
+import 'package:async/async.dart';
+import 'package:convert/convert.dart';
 
 import '../utils/main_drawer.dart';
 import '../utils/user.dart';
@@ -138,43 +142,109 @@ class _AutoUploadState extends State<AutoUpload> {
     }
   }
 
+  // From https://djangocas.dev/blog/flutter/calculate-file-crypto-hash-sha1-sha256-sha512/
+  Future<Digest> getFileSha256(String path) async {
+    final reader = ChunkedStreamReader(File(path).openRead());
+    const chunkSize = 4096;
+    var output = AccumulatorSink<Digest>();
+    var input = sha256.startChunkedConversion(output);
+
+    try {
+      while (true) {
+        final chunk = await reader.readChunk(chunkSize);
+        if (chunk.isEmpty) {
+          // indicate end of file
+          break;
+        }
+        input.add(chunk);
+      }
+    } finally {
+      // We always cancel the ChunkedStreamReader,
+      // this ensures the underlying stream is cancelled.
+      reader.cancel();
+    }
+
+    input.close();
+
+    return output.events.single;
+  }
+
   Future<void> _scanFolderContents(MediaFolder folder) async {
-    String path = folder.path;
+    List<FileSystemEntity> files = await dirContents(Directory(folder.path));
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
 
-    List<FileSystemEntity> files = await dirContents(Directory(path));
-
-    // Update the number of items in the directory
+    // Update the number of items in the directory and upload as necessary
     folder.itemCount = 0;
     for (var f in files) {
       if(f is File) {
         folder.itemCount++;
 
+        log("Processing file " + f.path);
+
         // Check if there are any unknown photos
         // TODO: Make a bunch of HTTP requests to the backend server
         // Send a request to the backend with the photo
-        String serverAddress = await User.getServerAddress();
-        var postUri = Uri.parse(serverAddress + '/api/v1/media');
-        var request = http.MultipartRequest("POST", postUri);
-        request.files.add(http.MultipartFile.fromBytes('file', await File.fromUri(f.uri).readAsBytes(), contentType: httpParser.MediaType('image', 'jpeg'))); // TODO: Dynamic filetype
 
-        request.send().then((response) {
-          if (response.statusCode == 200) {
-            log("Uploaded " + f.uri.toString());
+        final extension = p.extension(f.path, 1).substring(1);
+        if(["jpg", "jpeg", "png", "gif"].contains(extension)) {
+          log("Found image to check");
+          // This is an image, let's hash it and see if the server has it
+          final hash = await getFileSha256(f.path);
+          final hashBase64UrlSafe = base64Url.encode(hash.bytes);
+          log("sha256 hash hex in lowercase: ${hash.toString()}");
+          log("sha256 hash base64 url safe: $hashBase64UrlSafe");
+
+          var resp = await http.get(Uri.parse(serverAddress + '/api/v1/media/checkhash?hash=' + hashBase64UrlSafe),
+            headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
+          );
+
+          if(resp.statusCode == 304) {
+            // Found the image already, skip processing
+            log("Image already uploaded, ignoring");
+            continue;
+          } else if(resp.statusCode == 204) {
+            // Image not found, upload it!
+            log("New image to upload!");
+
+            var postUri = Uri.parse(serverAddress + '/api/v1/media');
+            var request = http.MultipartRequest("POST", postUri);
+            request.headers['authorization'] = 'Bearer ' + jwt;
+            request.files.add(http.MultipartFile.fromBytes('file',
+                await File.fromUri(f.uri).readAsBytes(),
+                contentType: httpParser.MediaType('image', extension)));
+
+            await request.send().then((response) {
+              if (response.statusCode == 200) {
+                log("Uploaded " + f.uri.toString());
+                log(response.toString());
+                // Add them to the recently uploaded list
+                String id = "1";//response.body.media_id;
+                Media m = Media.uploaded(
+                    id, MediaType.photo,
+                    serverAddress + "/api/v1/media/" + id + '/thumbnail',
+                    serverAddress + "/api/v1/media/" + id + '/media',
+                    f.path,
+                    DateTime.now()
+                );
+                _addMediaToRecentlyUploaded(m);
+
+              } else {
+                log("Failed to upload " + f.uri.toString() + ", code: " + response.statusCode.toString());
+              }
+            });
+
+
           } else {
-            log("Failed to upload " + f.uri.toString());
+            log("Media hash check failed: Code " + resp.statusCode.toString());
+            continue;
           }
-        });
 
-        // Add them to the recently uploaded list
-        // TODO: Only if newly uploaded
-        Media m = Media.uploaded(
-          folder.itemCount.toString(), MediaType.photo,
-          'https://picsum.photos/seed/' + folder.itemCount.toString() + '/256',
-          'https://picsum.photos/seed/' + folder.itemCount.toString() + '/4096',
-          f.path,
-          DateTime.now()
-        );
-        _addMediaToRecentlyUploaded(m);
+
+        } else {
+          log("Non-image found");
+        }
+
       }
     }
 

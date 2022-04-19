@@ -33,7 +33,7 @@ class _CollectionsState extends State<Collections> {
     try {
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections'),
           headers: {
-            HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+            HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
           });
     } on SocketException {
       log("Collection listing failed: Socket exception");
@@ -56,7 +56,7 @@ class _CollectionsState extends State<Collections> {
       try {
         resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + responseJson.collection_id),
             headers: {
-              HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+              HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
             });
       } on SocketException {
         log("Collection media listing failed: Socket exception");

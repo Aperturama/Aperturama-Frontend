@@ -38,7 +38,7 @@ class _SharedState extends State<Shared> {
     try {
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
           headers: {
-            HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+            HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
           });
 
       if(resp.statusCode != 200) {
@@ -69,7 +69,7 @@ class _SharedState extends State<Shared> {
     try {
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections'),
           headers: {
-            HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+            HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
           });
 
       if(resp.statusCode != 200) {
@@ -88,7 +88,7 @@ class _SharedState extends State<Shared> {
           try {
             resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + responseJson.collection_id),
                 headers: {
-                  HttpHeaders.authorizationHeader: 'Basic ' + jwt,
+                  HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
                 });
 
             if(resp.statusCode != 200) {

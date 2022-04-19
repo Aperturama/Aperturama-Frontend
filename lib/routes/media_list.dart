@@ -37,9 +37,7 @@ class _MediaListState extends State<MediaList> {
     try {
       log("JWT: " + jwt);
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Basic ' + jwt,
-        });
+        headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt });
     } on SocketException {
       log("Media listing failed: Socket exception");
       return media;
