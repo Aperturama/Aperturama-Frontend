@@ -82,7 +82,7 @@ class Media {
     }
   }
 
-  Future<bool> shareWithUser(String email) async {
+  Future<bool> shareWithUser(String email, bool editable) async {
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
     String jwt = await User.getJWT();
@@ -180,12 +180,116 @@ class Collection {
 
   Collection(this.name, this.information, this.id, this.shared, this.images);
 
+
   Future<bool> regenerateSharedLink() async {
-    return true;
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections/' + id + "/share/link"),
+        headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },);
+
+      if(resp.statusCode != 200) {
+        log("regenerateSharedLink Non 200 status code: " + resp.statusCode.toString());
+        return false;
+
+      } else {
+        final data = jsonDecode(resp.body);
+        log(data.toString());
+
+        // Success, save info
+        sharingLink = data["code"];
+        return true;
+      }
+
+    } on SocketException {
+      log("regenerateSharedLink socket exception");
+      return false;
+    }
   }
 
-  Future<bool> shareWithUser() async {
-    return true;
+  Future<bool> shareWithUser(String email, bool editable) async {
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections/' + id + "/share/user"),
+          headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
+          body: { "email": email }
+      );
+
+      if(resp.statusCode != 200) {
+        log("shareWithUser Non 200 status code: " + resp.statusCode.toString());
+        return false;
+
+      } else {
+        final data = jsonDecode(resp.body);
+        log(data.toString());
+
+        // Success, save info
+        sharingUsers.add(email);
+        return true;
+      }
+
+    } on SocketException {
+      log("shareWithUser socket exception");
+      return false;
+    }
+  }
+
+  Future<bool> unshareWithUser(String email) async {
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.delete(
+          Uri.parse(serverAddress + '/api/v1/collections/' + id + "/share/user"),
+          headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt},
+          body: { "email": email}
+      );
+
+      if (resp.statusCode != 200) {
+        log("unshareWithUser Non 200 status code: " +
+            resp.statusCode.toString());
+        return false;
+      } else {
+        final data = jsonDecode(resp.body);
+        log(data.toString());
+
+        // Success, save info
+        sharingUsers.remove(email);
+        return true;
+      }
+    } on SocketException {
+      log("unshareWithUser socket exception");
+      return false;
+    }
+  }
+
+  Future<bool> delete() async {
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.delete(Uri.parse(serverAddress + '/api/v1/collections/' + id),
+        headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
+      );
+
+      if(resp.statusCode != 200) {
+        log("delete Non 200 status code: " + resp.statusCode.toString());
+        return false;
+      } else {
+        return true;
+      }
+
+    } on SocketException {
+      log("delete socket exception");
+      return false;
+    }
   }
 }
 

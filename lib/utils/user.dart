@@ -118,6 +118,7 @@ class User {
     }
 
     // Success, get JWT
+    log("Login Success");
     String jwt = resp.body;
     log("JWT: " + jwt);
 

@@ -58,8 +58,7 @@ class _MediaSettingsState extends State<MediaSettings> {
                         ListTile(
                           horizontalTitleGap: 0,
                           title: Text(p.basename(media.localPath)),
-                          contentPadding:
-                              const EdgeInsets.only(left: 14, bottom: 10),
+                          contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
                           subtitle: Text(media.localPath),
                         ),
                         ListTile(
@@ -71,17 +70,11 @@ class _MediaSettingsState extends State<MediaSettings> {
                               "/" +
                               media.uploadedTimestamp.day.toString() +
                               " " +
-                              ((media.uploadedTimestamp.hour + 11) % 12 + 1)
-                                  .toString() +
+                              ((media.uploadedTimestamp.hour + 11) % 12 + 1).toString() +
                               ":" +
-                              media.uploadedTimestamp.minute
-                                  .toString()
-                                  .padLeft(2, '0') +
-                              ((media.uploadedTimestamp.hour >= 12)
-                                  ? " pm"
-                                  : " am")),
-                          contentPadding:
-                              const EdgeInsets.only(left: 14, bottom: 10),
+                              media.uploadedTimestamp.minute.toString().padLeft(2, '0') +
+                              ((media.uploadedTimestamp.hour >= 12) ? " pm" : " am")),
+                          contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
                           subtitle: Text(media.localPath),
                         ),
                         const ListTile(
@@ -91,8 +84,7 @@ class _MediaSettingsState extends State<MediaSettings> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('Enable sharing',
-                                style: Theme.of(context).textTheme.bodyText1),
+                            Text('Enable sharing', style: Theme.of(context).textTheme.bodyText1),
                             Switch(
                               value: media.shared,
                               onChanged: (value) {
@@ -116,8 +108,7 @@ class _MediaSettingsState extends State<MediaSettings> {
                           TextButton(
                             child: const Text('Copy Link'),
                             onPressed: () {
-                              Clipboard.setData(
-                                  ClipboardData(text: media.sharingLink));
+                              Clipboard.setData(ClipboardData(text: media.sharingLink));
                             },
                           ),
                           TextButton(
@@ -137,15 +128,12 @@ class _MediaSettingsState extends State<MediaSettings> {
                                   icon: const Icon(Icons.remove_circle_outline),
                                   onPressed: () async {
                                     if (await media.unshareWithUser(media.sharingUsers[index])) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                              content: Text('Media unshared with ' +
-                                                  media.sharingUsers[index] + '.')));
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content: Text('Media unshared with ' + media.sharingUsers[index] + '.')));
                                     } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                              content: Text('Failed to unshare media with ' +
-                                                  media.sharingUsers[index] + '.')));
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content:
+                                              Text('Failed to unshare media with ' + media.sharingUsers[index] + '.')));
                                     }
                                   },
                                 ),
@@ -163,8 +151,7 @@ class _MediaSettingsState extends State<MediaSettings> {
                             ),
                             controller: sharingUserController,
                           ),
-                          Text('Can Edit:',
-                              style: Theme.of(context).textTheme.bodyText1),
+                          Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
                           Switch(
                             value: sharingCanEdit,
                             onChanged: (value) {
@@ -176,18 +163,14 @@ class _MediaSettingsState extends State<MediaSettings> {
                           TextButton(
                             child: const Text('Share'),
                             onPressed: () async {
-                              if(await media.shareWithUser(sharingUserController.text)) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                    content: Text('Media shared with ' +
-                                        sharingUserController.text + '.')));
+                              if (await media.shareWithUser(sharingUserController.text, sharingCanEdit)) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Media shared with ' + sharingUserController.text + '.')));
                                 sharingUserController.text = "";
                                 setState(() {});
                               } else {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                    content: Text('Failed to share media with ' +
-                                        sharingUserController.text + '.')));
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    content: Text('Failed to share media with ' + sharingUserController.text + '.')));
                               }
                             },
                           ),
@@ -197,15 +180,12 @@ class _MediaSettingsState extends State<MediaSettings> {
                           child: const Text('Delete Media'),
                           onPressed: () async {
                             if (await media.delete()) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Media deleted.')));
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(content: Text('Media deleted.')));
                               Navigator.pop(context);
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Failed to delete media.')));
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(content: Text('Failed to delete media.')));
                             }
                           },
                         ),
