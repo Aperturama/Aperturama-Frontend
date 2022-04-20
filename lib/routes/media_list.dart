@@ -50,18 +50,19 @@ class _MediaListState extends State<MediaList> {
 
       // For each media item we got
       for (int i = 0; i < responseJson.length; i++) {
+        log("image " + i.toString());
         media.add(Media(
-          responseJson[i].media_id, MediaType.photo,
-          serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/thumbnail',
-          serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/media',
+          responseJson[i]["media_id"].toString(), MediaType.photo,
+          serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/thumbnail',
+          serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/media',
         ));
       }
+      log("images made");
 
     } on SocketException {
       log("Media listing failed: Socket exception");
       return media;
     }
-
 
     // TODO: Save and load from disk if network is unavailable
 
