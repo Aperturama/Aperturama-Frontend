@@ -48,14 +48,13 @@ class _SharedState extends State<Shared> {
       } else {
         log(resp.body);
         final responseJson = jsonDecode(resp.body);
-        log(resp.body);
 
         // For each media item we got
         for (int i = 0; i < responseJson.length; i++) {
           media.add(Media(
-            responseJson[i].media_id, MediaType.photo,
-            serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/thumbnail',
-            serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/media',
+            responseJson[i]["media_id"].toString(), MediaType.photo,
+            serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/thumbnail',
+            serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/media',
           ));
         }
       }
@@ -64,6 +63,7 @@ class _SharedState extends State<Shared> {
       log("Media listing failed: Socket exception");
     }
 
+    log("Shared media listed");
 
     List<Collection> collections = [];
 
@@ -81,14 +81,14 @@ class _SharedState extends State<Shared> {
         log(resp.body);
         final responseJson = jsonDecode(resp.body);
 
-
+        log("Listing collection media");
         // For each collection item we got
         for (int i = 0; i < responseJson.length; i++) {
           // Find all the photos
           // Send a request to the backend
           List<Media> m = [];
           try {
-            resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + responseJson.collection_id),
+            resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + responseJson[i]["collection_id"].toString()),
                 headers: {
                   HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
                 });
@@ -98,20 +98,20 @@ class _SharedState extends State<Shared> {
             } else {
               log(resp.body);
               final responseJson2 = jsonDecode(resp.body);
-              log(responseJson2);
 
-              final cmedia = responseJson2.media;
+              final cmedia = responseJson2["media"];
+              log("here");
               for (int k = 0; k < cmedia.length; k++) {
                 m.add(Media(
-                  cmedia[i].media_id, MediaType.photo,
-                  serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/thumbnail',
-                  serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/media',
+                  cmedia[i]["media_id"].toString(), MediaType.photo,
+                  serverAddress + "/api/v1/media/" + cmedia[i]["media_id"].toString() + '/thumbnail',
+                  serverAddress + "/api/v1/media/" + cmedia[i]["media_id"].toString() + '/media',
                 ));
               }
 
               // Save the collection
               collections.add(Collection(
-                responseJson[i].collection_id, "", responseJson[i].name,
+                responseJson[i]["collection_id"].toString(), "", responseJson[i]["collection_id"],
                 false,
                 m,
               ));
@@ -129,9 +129,8 @@ class _SharedState extends State<Shared> {
 
     // TODO: Save and load from disk if network is unavailable
 
-    MediaCollectionsLists sd = MediaCollectionsLists(collections, media);
+    return MediaCollectionsLists(collections, media);
 
-    return sd;
   }
 
   // Function to handle changing the size of the photo grid

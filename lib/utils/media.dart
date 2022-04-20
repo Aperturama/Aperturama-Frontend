@@ -292,7 +292,9 @@ class Collection {
 
       } else {
         // Success, save info
-        sharingUsers.add(email);
+        if(!sharingUsers.contains(email)) {
+          sharingUsers.add(email);
+        }
         return true;
       }
 

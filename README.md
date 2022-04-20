@@ -24,6 +24,7 @@ flutter build web --release
 - "No Media :(" or no collections messages  
 - Editing what media is in a collection could bring you back to the settings rather than the homepage
 - Hide photos that are already in a collection from the add view
+- Web version should hide/autofill server URL
 
 # References Used:
 https://docs.flutter.dev/
