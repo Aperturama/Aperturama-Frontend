@@ -54,9 +54,10 @@ class _CollectionSettingsState extends State<CollectionSettings> {
       final responseJson = jsonDecode(resp.body);
       collection.shared = responseJson["shared"] == "true" ? true : false;
       if (collection.shared) {
-        collection.sharingLink = serverAddress + "/#/s?collection=" + collection.id + "&code=" + responseJson["code"];
+        collection.sharingCode = responseJson["code"];
+        collection.sharingLink = serverAddress + "/#/s?collection=" + collection.id + "&code=" + collection.sharingCode;
       }
-
+      sharingLinkController.text = collection.sharingLink;
       initialDataPending = false;
       setState(() {});
     } on SocketException {
@@ -276,7 +277,16 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                           TextButton(
                             style: TextButton.styleFrom(primary: Colors.red),
                             child: const Text('Delete Collection'),
-                            onPressed: () {},
+                            onPressed: () async {
+                              if (await collection.delete()) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                   const SnackBar(content: Text('Collection deleted.')));
+                                Navigator.pushReplacementNamed(context, '/collections');
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                    content: Text('Failed to delete collection.')));
+                              }
+                            },
                           ),
                         ],
                       ),

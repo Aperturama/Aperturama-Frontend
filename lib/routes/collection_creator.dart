@@ -85,7 +85,7 @@ class _CollectionCreatorState extends State<CollectionCreator> {
                           onPressed: () async {
                             if (await createCollection(collectionNameController.text)) {
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Collection created')));
-                              Navigator.pop(context);
+                              Navigator.pushReplacementNamed(context, '/collections');
                             } else {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(const SnackBar(content: Text('Failed to create collection')));

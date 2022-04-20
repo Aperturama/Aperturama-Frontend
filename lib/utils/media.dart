@@ -18,6 +18,7 @@ class Media {
   late final String filename;
 
   bool shared = false;
+  String sharingCode = "None";
   String sharingLink = "None";
   List<String> sharingUsers = [];
 
@@ -173,7 +174,8 @@ class Collection {
   final String id;
 
   bool shared = false;
-  String sharingLink = "";
+  String sharingCode = "None";
+  String sharingLink = "None";
   List<String> sharingUsers = [];
 
   List<Media> media = []; // may also be previewImages and the rest gathered
@@ -214,21 +216,36 @@ class Collection {
     String jwt = await User.getJWT();
     http.Response resp;
     try {
-      resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections/' + id),
+      if(s) {
+        resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections/' + id + "/share/link"),
           headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
-      );
+        );
+      } else {
+        resp = await http.delete(Uri.parse(serverAddress + '/api/v1/collections/' + id + "/share/link/" + sharingCode),
+          headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
+        );
+      }
 
       if(resp.statusCode != 200) {
-        log("updateName Non 200 status code: " + resp.statusCode.toString());
+        log("updateSharing Non 200 status code: " + resp.statusCode.toString());
         return false;
 
       } else {
         // Success, save info
+        shared = s;
+        if(s) {
+          final data = jsonDecode(resp.body);
+          log(data.toString());
+          sharingCode = data["code"];
+          sharingLink = serverAddress + "/#/s?collection=" + id + "&code=" + sharingCode;
+        } else {
+          sharingCode = "";
+        }
         return true;
       }
 
     } on SocketException {
-      log("updateName socket exception");
+      log("updateSharing socket exception");
       return false;
     }
   }
@@ -248,11 +265,11 @@ class Collection {
         return false;
 
       } else {
+        // Success, save info
         final data = jsonDecode(resp.body);
         log(data.toString());
-
-        // Success, save info
-        sharingLink = data["code"];
+        sharingCode = data["code"];
+        sharingLink = serverAddress + "/#/s?collection=" + id + "&code=" + sharingCode;
         return true;
       }
 
