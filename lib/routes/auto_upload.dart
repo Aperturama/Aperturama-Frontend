@@ -199,7 +199,7 @@ class _AutoUploadState extends State<AutoUpload> {
           log("sha256 hash hex in lowercase: ${hash.toString()}");
           log("sha256 hash base64 url safe: $hashBase64UrlSafe");
 
-          var resp = await http.get(Uri.parse(serverAddress + '/api/v1/media/checkhash?hash=' + hashBase64UrlSafe),
+          var resp = await http.get(Uri.parse(serverAddress + '/api/v1/media/checkhash?hash=' + hash.toString()),
             headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
           );
 

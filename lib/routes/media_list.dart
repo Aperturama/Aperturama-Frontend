@@ -58,7 +58,7 @@ class _MediaListState extends State<MediaList> {
           serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/media',
         ));
         media[i].filename = responseJson[i]["filename"];
-        media[i].takenTimestamp = DateTime.parse(responseJson[i]["date_taken"]);
+        media[i].takenTimestamp = (responseJson[i]["date_taken"] != null) ? DateTime.parse(responseJson[i]["date_taken"]) : DateTime.now();
       }
       log("images made");
 

@@ -181,12 +181,12 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                                       sharingCanEdit = value;
                                       if (await collection.shareWithUser(sharingUserController.text, sharingCanEdit)) {
                                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                            content: Text('Media shared with ' + sharingUserController.text + '.')));
+                                            content: Text('Collection shared with ' + sharingUserController.text + '.')));
                                         setState(() {});
                                       } else {
                                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                             content:
-                                            Text('Failed to share media with ' + sharingUserController.text + '.')));
+                                            Text('Failed to share collection with ' + sharingUserController.text + '.')));
                                       }
                                     },
                                   ),

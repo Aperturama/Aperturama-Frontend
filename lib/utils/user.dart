@@ -211,8 +211,10 @@ class User {
 
     // Delete account information
     await storage.delete(key: "jwt");
-    await storage.delete(key: "firstName");
-    await storage.delete(key: "lastName");
+    await prefs.setString("firstName", "");
+    await prefs.setString("lastName", "");
+    await prefs.setString("recentlyUploaded", "");
+    await prefs.setString("localMediaFolders", "");
 
     // Set isLoggedIn to false
     prefs.setBool("isLoggedIn", false);

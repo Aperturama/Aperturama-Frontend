@@ -108,10 +108,10 @@ class _SharedState extends State<Shared> {
                   serverAddress + "/api/v1/media/" + cmedia[i]["media_id"].toString() + '/media',
                 ));
               }
-
+              log("here2");
               // Save the collection
               collections.add(Collection(
-                responseJson[i]["collection_id"].toString(), "", responseJson[i]["collection_id"],
+                responseJson[i]["name"], "", responseJson[i]["collection_id"].toString(),
                 false,
                 m,
               ));
