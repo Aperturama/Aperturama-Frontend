@@ -142,11 +142,12 @@ class _MediaListState extends State<MediaList> {
               future: _getMediaList(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return MediaGrid(snapshot.data!, _gridSize, jwt, code);
+                  return snapshot.data!.isNotEmpty ? MediaGrid(snapshot.data!, _gridSize, jwt, code)
+                  : const Center(child: Text("No media items found."));
                 } else if (snapshot.hasError) {
-                  return const Text("Error");
+                  return const Center(child: Text("Error"));
                 }
-                return const Text("Loading...");
+                return const Center(child: Text("Loading..."));
               },
             ),
           ),

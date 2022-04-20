@@ -116,11 +116,12 @@ class _CollectionsState extends State<Collections> {
               future: _getCollectionsList(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return CollectionList(snapshot.data!, jwt);
+                  return snapshot.data!.isNotEmpty ? CollectionList(snapshot.data!, jwt)
+                      : const Center(child: Text("No collections found."));
                 } else if (snapshot.hasError) {
-                  return const Text("Error");
+                  return const Center(child: Text("Error"));
                 }
-                return const Text("Loading...");
+                return const Center(child: Text("Loading..."));
               },
             ),
           ),
