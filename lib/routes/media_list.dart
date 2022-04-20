@@ -56,6 +56,8 @@ class _MediaListState extends State<MediaList> {
           serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/thumbnail',
           serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/media',
         ));
+        media[i].filename = responseJson[i]["filename"];
+        media[i].takenTimestamp = DateTime.parse(responseJson[i]["date_taken"]);
       }
       log("images made");
 
@@ -97,12 +99,6 @@ class _MediaListState extends State<MediaList> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
 
     // Set up the initial grid sizing
     // TODO: This doesn't reload when a web browser's size is changed, should probably be fixed
@@ -169,7 +165,15 @@ class MediaGrid extends StatelessWidget {
     // Make a nice button that has the thumbnail inside it
     return GestureDetector(
       onTap: () =>
-          {Navigator.pushNamed(context, '/media_viewer', arguments: media)},
+          { Navigator.pushNamed(
+            context,
+            '/media_viewer',
+            arguments: <String, dynamic>{
+              'media': media,
+              'jwt': jwt,
+              'code': "",
+            },
+          )},
       child: MediaIcon(media, jwt),
     );
   }

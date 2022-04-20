@@ -150,6 +150,7 @@ class CollectionList extends StatelessWidget {
           arguments: <String, dynamic>{
             'collection': collection,
             'jwt': jwt,
+            'code': ""
           },
         )
       },

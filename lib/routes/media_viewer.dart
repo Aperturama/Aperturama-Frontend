@@ -2,6 +2,10 @@ import 'package:aperturama/routes/media_settings.dart';
 import 'package:aperturama/utils/media.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:developer';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
 
 
 class MediaViewer extends StatefulWidget {
@@ -22,7 +26,7 @@ class MediaViewer extends StatefulWidget {
 
 class _MediaViewerState extends State<MediaViewer> {
   double _maxScale = 1;
-  late final Media media;
+  late Media media;
   String jwt = "";
   String code = "";
 
@@ -30,6 +34,11 @@ class _MediaViewerState extends State<MediaViewer> {
   @override
   void initState() {
     super.initState();
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     // Take in information about the current media given as args,
     // or set it to no media if the args are invalid for some reason
@@ -42,10 +51,7 @@ class _MediaViewerState extends State<MediaViewer> {
       media = Media("", MediaType.photo, "", "");
       // Todo: Probably navigate back to the /photos page
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
@@ -57,7 +63,15 @@ class _MediaViewerState extends State<MediaViewer> {
             IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () {
-                Navigator.pushNamed(context, '/media_settings', arguments: media);
+                Navigator.pushNamed(
+                  context,
+                  '/media_settings',
+                  arguments: <String, dynamic>{
+                    'media': media,
+                    'jwt': jwt,
+                    'code': "",
+                  },
+                );
               },
               tooltip: 'Media Information and Settings',
             ),
@@ -68,6 +82,7 @@ class _MediaViewerState extends State<MediaViewer> {
               minScale: 1,
               maxScale: _maxScale,
               child: CachedNetworkImage(
+                httpHeaders: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
                 imageUrl: media.highresURL,
                 // Make the image fit the width
                 imageBuilder: (context, imageProvider) {
@@ -89,6 +104,7 @@ class _MediaViewerState extends State<MediaViewer> {
                   children: <Widget>[
                     // Low-res thumbnail
                     CachedNetworkImage(
+                      httpHeaders: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
                       imageUrl: media.thumbnailURL,
                       progressIndicatorBuilder: (context, url, downloadProgress) =>
                           CircularProgressIndicator(

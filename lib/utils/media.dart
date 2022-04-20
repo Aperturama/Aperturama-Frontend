@@ -15,14 +15,15 @@ class Media {
   late final String thumbnailURL;
   late final String highresURL;
   late final String localPath;
+  late final String filename;
 
-  late bool shared;
+  bool shared = false;
   late String sharingLink;
   late List<String> sharingUsers;
 
   late bool uploadedSuccessfully;
-  late final DateTime uploadedTimestamp;
-  late final DateTime takenTimestamp;
+  DateTime uploadedTimestamp = DateTime.fromMicrosecondsSinceEpoch(0);
+  DateTime takenTimestamp = DateTime.fromMicrosecondsSinceEpoch(0);
 
   Media(this.id, this.type, this.thumbnailURL, this.highresURL);
 
