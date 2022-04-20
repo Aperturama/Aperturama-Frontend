@@ -145,11 +145,12 @@ class _CollectionMediaManagerRemoveState extends State<CollectionMediaManagerRem
                 onPressed: () async {
                   if (await collection.removeMedia(selectedMedia)) {
                     ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('Media added successfully.')));
-                    Navigator.pop(context);
+                        .showSnackBar(const SnackBar(content: Text('Media removed successfully.')));
+                    setState(() {});
+                    Navigator.pushReplacementNamed(context, '/collections');
                   } else {
                     ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('Failed to add media.')));
+                        .showSnackBar(const SnackBar(content: Text('Failed to remove media.')));
                   }
                 },
               ),

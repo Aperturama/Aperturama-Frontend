@@ -219,12 +219,13 @@ class _AutoUploadState extends State<AutoUpload> {
                 contentType: httpParser.MediaType('image', extension),
             filename: p.basename(f.path)));
 
-            await request.send().then((response) {
-              if (response.statusCode == 200) {
+            await request.send().then((streamedResponse) async {
+              if (streamedResponse.statusCode == 200) {
                 log("Uploaded " + f.uri.toString());
+                var response = await http.Response.fromStream(streamedResponse);
                 log(response.toString());
                 // Add them to the recently uploaded list
-                String id = "1";//response.body.media_id;
+                String id = jsonDecode(response.body)["media_id"].toString();
                 Media m = Media.uploaded(
                     id, MediaType.photo,
                     serverAddress + "/api/v1/media/" + id + '/thumbnail',
@@ -235,10 +236,12 @@ class _AutoUploadState extends State<AutoUpload> {
                 _addMediaToRecentlyUploaded(m);
 
               } else {
-                log("Failed to upload " + f.uri.toString() + ", code: " + response.statusCode.toString());
+                log("Failed to upload " + f.uri.toString() + ", code: " + streamedResponse.statusCode.toString());
               }
             });
 
+            // Rerender the UI
+            setState(() {});
 
           } else {
             log("Media hash check failed: Code " + resp.statusCode.toString());

@@ -192,7 +192,8 @@ class _CollectionMediaManagerAddState extends State<CollectionMediaManagerAdd> {
                         if (await collection.addMedia(selectedMedia)) {
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(content: Text('Media added successfully.')));
-                          Navigator.pop(context);
+                          setState(() {});
+                          Navigator.pushReplacementNamed(context, '/collections');
                         } else {
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(content: Text('Failed to add media.')));

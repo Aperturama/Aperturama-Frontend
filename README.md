@@ -22,6 +22,8 @@ flutter build web --release
 - A splash screen (https://docs.flutter.dev/development/ui/advanced/splash-screen)
 - Proper looking name/app icon on Android
 - "No Media :(" or no collections messages  
+- Editing what media is in a collection could bring you back to the settings rather than the homepage
+- Hide photos that are already in a collection from the add view
 
 # References Used:
 https://docs.flutter.dev/

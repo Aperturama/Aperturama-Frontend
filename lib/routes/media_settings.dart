@@ -162,7 +162,6 @@ class _MediaSettingsState extends State<MediaSettings> {
                                 labelText: 'Sharing Link',
                               ),
                               readOnly: true,
-                              initialValue: media.sharingLink,
                               controller: sharingLinkController,
                             ),
                             Row(children: [
@@ -180,21 +179,44 @@ class _MediaSettingsState extends State<MediaSettings> {
                                 },
                               ),
                             ]),
-                            ListView.builder(
+// List of people shared with
+                            const ListTile(title: Text("Shared with users:")),
+                            media.sharingUsers.isEmpty
+                                ? const Text("Nobody :(")
+                                : ListView.builder(
+                              shrinkWrap: true,
                               itemBuilder: (BuildContext context, int index) {
                                 return Row(
                                   children: [
                                     Text(media.sharingUsers[index]),
+                                    Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
+                                    Switch(
+                                      value: sharingCanEdit,
+                                      onChanged: (value) async {
+                                        if (await media.shareWithUser(sharingUserController.text, sharingCanEdit)) {
+                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                              content: Text('Media shared with ' + sharingUserController.text + '.')));
+                                          sharingUserController.text = "";
+                                          setState(() {});
+                                        } else {
+                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                              content:
+                                              Text('Failed to share media with ' + sharingUserController.text + '.')));
+                                        }
+                                      },
+                                    ),
                                     IconButton(
                                       icon: const Icon(Icons.remove_circle_outline),
                                       onPressed: () async {
                                         if (await media.unshareWithUser(media.sharingUsers[index])) {
                                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                              content: Text('Media unshared with ' + media.sharingUsers[index] + '.')));
+                                              content: Text(
+                                                  'Collection unshared with ' + media.sharingUsers[index] + '.')));
                                         } else {
                                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                              content: Text(
-                                                  'Failed to unshare media with ' + media.sharingUsers[index] + '.')));
+                                              content: Text('Failed to unshare collection with ' +
+                                                  media.sharingUsers[index] +
+                                                  '.')));
                                         }
                                       },
                                     ),
@@ -203,15 +225,18 @@ class _MediaSettingsState extends State<MediaSettings> {
                               },
                               itemCount: media.sharingUsers.length,
                             ),
-                            Row(children: [
-                              TextFormField(
-                                decoration: const InputDecoration(
-                                  filled: true,
-                                  hintText: "User's email",
-                                  labelText: 'Share to new user',
-                                ),
-                                controller: sharingUserController,
+
+                            const SizedBox(height: 30),
+                            // Adding a new person to share with
+                            TextFormField(
+                              decoration: const InputDecoration(
+                                filled: true,
+                                hintText: "User's email",
+                                labelText: 'Share to new user',
                               ),
+                              controller: sharingUserController,
+                            ),
+                            Row(children: [
                               Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
                               Switch(
                                 value: sharingCanEdit,
@@ -244,7 +269,7 @@ class _MediaSettingsState extends State<MediaSettings> {
                                 if (await media.delete()) {
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(const SnackBar(content: Text('Media deleted.')));
-                                  Navigator.pop(context);
+                                  Navigator.pushReplacementNamed(context, '/media');
                                 } else {
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(const SnackBar(content: Text('Failed to delete media.')));

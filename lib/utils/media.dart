@@ -18,8 +18,8 @@ class Media {
   late final String filename;
 
   bool shared = false;
-  late String sharingLink;
-  late List<String> sharingUsers;
+  String sharingLink = "None";
+  List<String> sharingUsers = [];
 
   late bool uploadedSuccessfully;
   DateTime uploadedTimestamp = DateTime.fromMicrosecondsSinceEpoch(0);
@@ -181,6 +181,58 @@ class Collection {
 
   Collection(this.name, this.information, this.id, this.shared, this.media);
 
+  Future<bool> updateName(String n) async {
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.put(Uri.parse(serverAddress + '/api/v1/collections/' + id),
+        headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
+        body: { "name": n }
+      );
+
+      if(resp.statusCode != 200) {
+        log("updateName Non 200 status code: " + resp.statusCode.toString());
+        return false;
+
+      } else {
+        // Success, save info
+        name = n;
+        return true;
+      }
+
+    } on SocketException {
+      log("updateName socket exception");
+      return false;
+    }
+  }
+
+  Future<bool> updateSharing(bool s) async {
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections/' + id),
+          headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
+      );
+
+      if(resp.statusCode != 200) {
+        log("updateName Non 200 status code: " + resp.statusCode.toString());
+        return false;
+
+      } else {
+        // Success, save info
+        return true;
+      }
+
+    } on SocketException {
+      log("updateName socket exception");
+      return false;
+    }
+  }
+
 
   Future<bool> regenerateSharedLink() async {
     // Send a request to the backend
@@ -293,23 +345,24 @@ class Collection {
     }
   }
 
-  Future<bool> addMedia(List<Media> media) async {
+  Future<bool> addMedia(List<Media> newMedia) async {
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
     String jwt = await User.getJWT();
     http.Response resp;
-    for (int i = 0; i < media.length; i++) {
+    for (int i = 0; i < newMedia.length; i++) {
       try {
         resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections/' + id),
             headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt},
-            body: { "media_id": media[i].id }
+            body: { "media_id": newMedia[i].id }
         );
 
-        if (resp.statusCode != 200) {
-          log("addMedia Non 200 status code: " + resp.statusCode.toString());
+        if (resp.statusCode != 200 && resp.statusCode != 304) {
+          log("addMedia Non 200/304 status code: " + resp.statusCode.toString());
           return false;
         }
-        // else continue to add the rest of the media
+        // else continue to the rest of the media
+        media.add(newMedia[i]);
 
       } on SocketException {
         log("addMedia socket exception");
@@ -319,22 +372,23 @@ class Collection {
     return true;
   }
 
-  Future<bool> removeMedia(List<Media> media) async {
+  Future<bool> removeMedia(List<Media> mediaToDelete) async {
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
     String jwt = await User.getJWT();
     http.Response resp;
-    for (int i = 0; i < media.length; i++) {
+    for (int i = 0; i < mediaToDelete.length; i++) {
       try {
-        resp = await http.delete(Uri.parse(serverAddress + '/api/v1/collections/' + id + "/media/" + media[i].id),
+        resp = await http.delete(Uri.parse(serverAddress + '/api/v1/collections/' + id + "/media/" + mediaToDelete[i].id),
             headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt},
         );
 
-        if (resp.statusCode != 200) {
-          log("removeMedia Non 200 status code: " + resp.statusCode.toString());
+        if (resp.statusCode != 200 && resp.statusCode != 304) {
+          log("removeMedia Non 200/304 status code: " + resp.statusCode.toString());
           return false;
         }
-        // else continue to add the rest of the media
+        // else continue to the rest of the media
+        media.remove(mediaToDelete[i]);
 
       } on SocketException {
         log("removeMedia socket exception");

@@ -31,7 +31,6 @@ class _CollectionsState extends State<Collections> {
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
     jwt = await User.getJWT();
-    log(jwt);
     http.Response resp;
     try {
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections'),
@@ -48,7 +47,6 @@ class _CollectionsState extends State<Collections> {
       return collections;
     }
 
-    log(resp.body);
     final responseJson = jsonDecode(resp.body);
 
     // For each collection item we got
@@ -66,16 +64,15 @@ class _CollectionsState extends State<Collections> {
           return collections;
         }
 
-        log(resp.body);
         final responseJson2 = jsonDecode(resp.body);
         List<Media> m = [];
 
         final cmedia = responseJson2["media"];
         for (int k = 0; k < cmedia.length; k++) {
           m.add(Media(
-            cmedia[i]["media_id"].toString(), MediaType.photo,
-            serverAddress + "/api/v1/media/" + cmedia[i]["media_id"].toString() + '/thumbnail',
-            serverAddress + "/api/v1/media/" + cmedia[i]["media_id"].toString() + '/media',
+            cmedia[k]["media_id"].toString(), MediaType.photo,
+            serverAddress + "/api/v1/media/" + cmedia[k]["media_id"].toString() + '/thumbnail',
+            serverAddress + "/api/v1/media/" + cmedia[k]["media_id"].toString() + '/media',
           ));
         }
 
@@ -91,7 +88,6 @@ class _CollectionsState extends State<Collections> {
     }
 
     // TODO: Save and load from disk if network is unavailable
-
     return collections;
   }
 

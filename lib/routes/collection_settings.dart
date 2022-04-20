@@ -67,6 +67,11 @@ class _CollectionSettingsState extends State<CollectionSettings> {
     // TODO: Save and load from disk if network is unavailable
   }
 
+  Future<bool> _onBackPressed() async {
+    Navigator.pushReplacementNamed(context, '/collections');
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Take in information about the current collection given as args,
@@ -80,202 +85,206 @@ class _CollectionSettingsState extends State<CollectionSettings> {
       // Todo: Probably navigate back to the /photos page
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Collection Settings"),
-        centerTitle: true,
-      ),
-      body: (initialDataPending)
-          ? const Text("Loading...")
-          : Form(
-              key: _formKey,
-              child: Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const ListTile(title: Text("General Settings")),
-                        TextFormField(
-                          decoration: const InputDecoration(
-                            filled: true,
-                            hintText: 'Enter a name for the collection.',
-                            labelText: 'Collection Name',
-                          ),
-                          initialValue: collection.name,
-                          onChanged: (value) {
-                            setState(() {
-                              collection.name = value;
-                            });
-                          },
-                        ),
-                        const Divider(),
-                        const ListTile(title: Text("Sharing Settings")),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text('Enable sharing', style: Theme.of(context).textTheme.bodyText1),
-                            Switch(
-                              value: collection.shared,
-                              onChanged: (value) {
-                                setState(() {
-                                  collection.shared = value;
-                                });
-                              },
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Collection Settings"),
+          centerTitle: true,
+        ),
+        body: (initialDataPending)
+            ? const Text("Loading...")
+            : Form(
+                key: _formKey,
+                child: Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const ListTile(title: Text("General Settings")),
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              filled: true,
+                              hintText: 'Enter a name for the collection.',
+                              labelText: 'Collection Name',
                             ),
-                          ],
-                        ),
-                        TextFormField(
-                          decoration: const InputDecoration(
-                            filled: true,
-                            labelText: 'Sharing Link',
-                          ),
-                          readOnly: true,
-                          controller: sharingLinkController,
-                        ),
-                        Row(children: [
-                          TextButton(
-                            child: const Text('Copy Link'),
-                            onPressed: () {
-                              Clipboard.setData(ClipboardData(text: collection.sharingLink));
-                            },
-                          ),
-                          TextButton(
-                            child: const Text('Regenerate'),
-                            onPressed: () async {
-                              await collection.regenerateSharedLink();
-                              sharingLinkController.text = collection.sharingLink;
-                            },
-                          ),
-                        ]),
-
-                        // List of people shared with
-                        const ListTile(title: Text("Shared with users:")),
-                        collection.sharingUsers.isEmpty
-                          ? const Text("Nobody :(")
-                          : ListView.builder(
-                          shrinkWrap: true,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Row(
-                              children: [
-                                Text(collection.sharingUsers[index]),
-                                Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
-                                Switch(
-                                  value: sharingCanEdit,
-                                  onChanged: (value) async {
-                                    if (await collection.shareWithUser(sharingUserController.text, sharingCanEdit)) {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                          content: Text('Media shared with ' + sharingUserController.text + '.')));
-                                      sharingUserController.text = "";
-                                      setState(() {});
-                                    } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                          content:
-                                          Text('Failed to share media with ' + sharingUserController.text + '.')));
-                                    }
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                  onPressed: () async {
-                                    if (await collection.unshareWithUser(collection.sharingUsers[index])) {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                          content: Text(
-                                              'Collection unshared with ' + collection.sharingUsers[index] + '.')));
-                                    } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                          content: Text('Failed to unshare collection with ' +
-                                              collection.sharingUsers[index] +
-                                              '.')));
-                                    }
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                          itemCount: collection.sharingUsers.length,
-                        ),
-                        const SizedBox(height: 30),
-                        // Adding a new person to share with
-                        TextFormField(
-                          decoration: const InputDecoration(
-                            filled: true,
-                            hintText: "User's email",
-                            labelText: 'Share to new user',
-                          ),
-                          controller: sharingUserController,
-                        ),
-                        Row(
-                            children: [
-                          Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
-                          Switch(
-                            value: sharingCanEdit,
+                            initialValue: collection.name,
                             onChanged: (value) {
                               setState(() {
-                                sharingCanEdit = value;
+                                collection.updateName(value);
                               });
                             },
                           ),
-                          TextButton(
-                            child: const Text('Share'),
-                            onPressed: () async {
-                              if (await collection.shareWithUser(sharingUserController.text, sharingCanEdit)) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Media shared with ' + sharingUserController.text + '.')));
-                                sharingUserController.text = "";
-                                setState(() {});
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    content: Text('Failed to share media with ' + sharingUserController.text + '.')));
-                              }
-                            },
-                          ),
-                        ]),
-                        const ListTile(
-                          title: Text("Manage Media"),
-                        ),
-                        Row(children: [
-                          TextButton(
-                            child: const Text('Add Media'),
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/collection_media_manager_add',
-                                arguments: <String, dynamic>{
-                                  'collection': collection,
-                                  'jwt': jwt,
+                          const Divider(),
+                          const ListTile(title: Text("Sharing Settings")),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text('Enable sharing', style: Theme.of(context).textTheme.bodyText1),
+                              Switch(
+                                value: collection.shared,
+                                onChanged: (value) {
+                                  setState(() {
+                                    collection.updateSharing(value);
+                                  });
                                 },
+                              ),
+                            ],
+                          ),
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              filled: true,
+                              labelText: 'Sharing Link',
+                            ),
+                            readOnly: true,
+                            controller: sharingLinkController,
+                          ),
+                          Row(children: [
+                            TextButton(
+                              child: const Text('Copy Link'),
+                              onPressed: () {
+                                Clipboard.setData(ClipboardData(text: collection.sharingLink));
+                              },
+                            ),
+                            TextButton(
+                              child: const Text('Regenerate'),
+                              onPressed: () async {
+                                await collection.regenerateSharedLink();
+                                sharingLinkController.text = collection.sharingLink;
+                              },
+                            ),
+                          ]),
+
+                          // List of people shared with
+                          const ListTile(title: Text("Shared with users:")),
+                          collection.sharingUsers.isEmpty
+                            ? const Text("Nobody :(")
+                            : ListView.builder(
+                            shrinkWrap: true,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Row(
+                                children: [
+                                  Text(collection.sharingUsers[index]),
+                                  Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
+                                  Switch(
+                                    value: sharingCanEdit,
+                                    onChanged: (value) async {
+                                      if (await collection.shareWithUser(sharingUserController.text, sharingCanEdit)) {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                            content: Text('Media shared with ' + sharingUserController.text + '.')));
+                                        sharingUserController.text = "";
+                                        setState(() {});
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                            content:
+                                            Text('Failed to share media with ' + sharingUserController.text + '.')));
+                                      }
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.remove_circle_outline),
+                                    onPressed: () async {
+                                      if (await collection.unshareWithUser(collection.sharingUsers[index])) {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                            content: Text(
+                                                'Collection unshared with ' + collection.sharingUsers[index] + '.')));
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                            content: Text('Failed to unshare collection with ' +
+                                                collection.sharingUsers[index] +
+                                                '.')));
+                                      }
+                                    },
+                                  ),
+                                ],
                               );
                             },
+                            itemCount: collection.sharingUsers.length,
                           ),
+
+                          const SizedBox(height: 30),
+                          // Adding a new person to share with
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              filled: true,
+                              hintText: "User's email",
+                              labelText: 'Share to new user',
+                            ),
+                            controller: sharingUserController,
+                          ),
+                          Row(
+                              children: [
+                            Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
+                            Switch(
+                              value: sharingCanEdit,
+                              onChanged: (value) {
+                                setState(() {
+                                  sharingCanEdit = value;
+                                });
+                              },
+                            ),
+                            TextButton(
+                              child: const Text('Share'),
+                              onPressed: () async {
+                                if (await collection.shareWithUser(sharingUserController.text, sharingCanEdit)) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Media shared with ' + sharingUserController.text + '.')));
+                                  sharingUserController.text = "";
+                                  setState(() {});
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                      content: Text('Failed to share media with ' + sharingUserController.text + '.')));
+                                }
+                              },
+                            ),
+                          ]),
+                          const ListTile(
+                            title: Text("Manage Media"),
+                          ),
+                          Row(children: [
+                            TextButton(
+                              child: const Text('Add Media'),
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/collection_media_manager_add',
+                                  arguments: <String, dynamic>{
+                                    'collection': collection,
+                                    'jwt': jwt,
+                                  },
+                                );
+                              },
+                            ),
+                            TextButton(
+                              child: const Text('Remove Media'),
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/collection_media_manager_remove',
+                                  arguments: <String, dynamic>{
+                                    'collection': collection,
+                                    'jwt': jwt,
+                                  },
+                                );
+                              },
+                            ),
+                          ]),
                           TextButton(
-                            child: const Text('Remove Media'),
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/collection_media_manager_remove',
-                                arguments: <String, dynamic>{
-                                  'collection': collection,
-                                  'jwt': jwt,
-                                },
-                              );
-                            },
+                            style: TextButton.styleFrom(primary: Colors.red),
+                            child: const Text('Delete Collection'),
+                            onPressed: () {},
                           ),
-                        ]),
-                        TextButton(
-                          style: TextButton.styleFrom(primary: Colors.red),
-                          child: const Text('Delete Collection'),
-                          onPressed: () {},
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+      ),
     );
   }
 }
