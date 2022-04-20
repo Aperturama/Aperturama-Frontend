@@ -70,16 +70,15 @@ class _CollectionsState extends State<Collections> {
         final responseJson2 = jsonDecode(resp.body);
         List<Media> m = [];
 
-        if(responseJson2.length > 0 && responseJson2.containsKey("media")) {
-          final cmedia = responseJson2["media"];
-          for (int k = 0; k < cmedia.length; k++) {
-            m.add(Media(
-              cmedia[i].media_id, MediaType.photo,
-              serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/thumbnail',
-              serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/media',
-            ));
-          }
+        final cmedia = responseJson2["media"];
+        for (int k = 0; k < cmedia.length; k++) {
+          m.add(Media(
+            cmedia[i]["media_id"].toString(), MediaType.photo,
+            serverAddress + "/api/v1/media/" + cmedia[i]["media_id"].toString() + '/thumbnail',
+            serverAddress + "/api/v1/media/" + cmedia[i]["media_id"].toString() + '/media',
+          ));
         }
+
 
         // Save the collection
         collections.add(Collection(responseJson[i]["name"], "", responseJson[i]["collection_id"].toString(), false, m));
@@ -161,8 +160,8 @@ class CollectionList extends StatelessWidget {
             GridView.count(
               shrinkWrap: true,
               crossAxisCount: 4,
-              children: List.generate(math.min(4, collection.images.length), (index) {
-                return MediaIcon(collection.images[index], jwt);
+              children: List.generate(math.min(4, collection.media.length), (index) {
+                return MediaIcon(collection.media[index], jwt);
               }),
             ),
             ListTile(

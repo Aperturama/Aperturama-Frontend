@@ -114,7 +114,7 @@ class _CollectionViewerState extends State<CollectionViewer> {
               contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
             ),
             Expanded(
-              child: MediaGrid(collection.images, _gridSize, jwt),
+              child: MediaGrid(collection.media, _gridSize, jwt),
             ),
           ],
         ));

@@ -24,8 +24,7 @@ class _CollectionMediaManagerRemoveState extends State<CollectionMediaManagerRem
   int _gridSize = 0; // Start at 0 and set during the first build
   int _gridSizeMax = 0; // Start at 0 and set during the first build
 
-  List<Media> media = [];
-  List<Media> newMedia = [];
+  List<Media> selectedMedia = [];
   late final Collection collection;
 
   String mode = "";
@@ -36,52 +35,9 @@ class _CollectionMediaManagerRemoveState extends State<CollectionMediaManagerRem
   @override
   void initState() {
     super.initState();
-    _getMediaList();
   }
 
   // TODO: Enable swipe down to reload
-
-  // Store the URLs for all the photos the app needs to download and cache
-  Future<void> _getMediaList() async {
-    // Send a request to the backend
-    String serverAddress = await User.getServerAddress();
-    jwt = await User.getJWT();
-    http.Response resp;
-    try {
-      log("JWT: " + jwt);
-      resp = await http
-          .get(Uri.parse(serverAddress + '/api/v1/media'), headers: {HttpHeaders.authorizationHeader: 'Bearer ' + jwt});
-
-      if (resp.statusCode != 200) {
-        log("Media listing failed: Code " + resp.statusCode.toString());
-        return;
-      }
-
-      log(resp.body);
-      final responseJson = jsonDecode(resp.body);
-
-      // For each media item we got
-      for (int i = 0; i < responseJson.length; i++) {
-        log("image " + i.toString());
-        media.add(Media(
-          responseJson[i]["media_id"].toString(),
-          MediaType.photo,
-          serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/thumbnail',
-          serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/media',
-        ));
-        media[i].filename = responseJson[i]["filename"];
-        media[i].takenTimestamp = DateTime.parse(responseJson[i]["date_taken"]);
-      }
-      log("images made");
-
-    } on SocketException {
-      log("Media listing failed: Socket exception");
-      return;
-    }
-
-    initialDataPending = false;
-    setState(() {});
-  }
 
   // Function to handle changing the size of the photo grid
   void _changeGridSize(int amount) {
@@ -109,26 +65,26 @@ class _CollectionMediaManagerRemoveState extends State<CollectionMediaManagerRem
     });
   }
 
-  Widget _createTappableMediaIcon(BuildContext context, Media media, List<Media> newMedia) {
+  Widget _createTappableMediaIcon(Media media) {
     // Make a nice button that has the thumbnail inside it
     return GestureDetector(
         onTap: () {
           log("adding media");
-          if (newMedia.contains(media)) {
-            newMedia.remove(media);
+          if (selectedMedia.contains(media)) {
+            selectedMedia.remove(media);
           } else {
-            newMedia.add(media);
+            selectedMedia.add(media);
           }
-          log(newMedia.toString());
+          log(selectedMedia.toString());
           setState(() {});
         },
         child: Stack(
           children: <Widget>[
             MediaIcon(media, jwt),
-            if (newMedia.contains(media))
+            if (selectedMedia.contains(media))
               const Align(
                 alignment: Alignment.topRight,
-                child: Icon(Icons.add_circle_outline),
+                child: Icon(Icons.remove_circle_outline),
               ),
           ],
         ));
@@ -136,12 +92,11 @@ class _CollectionMediaManagerRemoveState extends State<CollectionMediaManagerRem
 
   @override
   Widget build(BuildContext context) {
-    if (mode == "") {
-      // Don't do this a 2nd time
+    if (jwt == "") {
+      // Only run this once
       if (ModalRoute.of(context)!.settings.arguments != null) {
         var args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
         collection = args["collection"];
-        mode = args["mode"];
         jwt = args["jwt"];
       } else {
         collection = Collection("", "", "", false, []);
@@ -159,7 +114,7 @@ class _CollectionMediaManagerRemoveState extends State<CollectionMediaManagerRem
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Select media to " + (mode == "add" ? "add" : "remove")),
+        title: const Text("Select media to remove", style: TextStyle(fontSize: 16)),
         centerTitle: true,
         actions: [
           IconButton(
@@ -183,33 +138,32 @@ class _CollectionMediaManagerRemoveState extends State<CollectionMediaManagerRem
           child: kIsWeb ? const MainDrawer() : null,
         ),
         Expanded(
-          child: initialDataPending
-              ? Text("Loading...")
-              : Column(
-                  children: [
-                    TextButton(
-                      child: const Text("Save"),
-                      onPressed: () async {
-                        if (await collection.addMedia(newMedia)) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(content: Text('Media added successfully.')));
-                          Navigator.pop(context);
-                        } else {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(content: Text('Failed to add media.')));
-                        }
-                      },
-                    ),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: _gridSize),
-                      itemBuilder: (BuildContext context, int index) {
-                        return _createTappableMediaIcon(context, media[index], newMedia);
-                      },
-                      itemCount: media.length,
-                    ),
-                  ],
-                ))
+          child: Column(
+            children: [
+              TextButton(
+                child: const Text("Save"),
+                onPressed: () async {
+                  if (await collection.removeMedia(selectedMedia)) {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('Media added successfully.')));
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('Failed to add media.')));
+                  }
+                },
+              ),
+              GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: _gridSize),
+                itemBuilder: (BuildContext context, int index) {
+                  return _createTappableMediaIcon(collection.media[index]);
+                },
+                itemCount: collection.media.length,
+              ),
+            ],
+          )
+        )
       ]),
     );
   }

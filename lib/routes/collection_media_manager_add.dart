@@ -25,7 +25,7 @@ class _CollectionMediaManagerAddState extends State<CollectionMediaManagerAdd> {
   int _gridSizeMax = 0; // Start at 0 and set during the first build
 
   List<Media> media = [];
-  List<Media> newMedia = [];
+  List<Media> selectedMedia = [];
   late final Collection collection;
 
   String mode = "";
@@ -109,23 +109,23 @@ class _CollectionMediaManagerAddState extends State<CollectionMediaManagerAdd> {
     });
   }
 
-  Widget _createTappableMediaIcon(BuildContext context, Media media, List<Media> newMedia) {
+  Widget _createTappableMediaIcon(Media media) {
     // Make a nice button that has the thumbnail inside it
     return GestureDetector(
         onTap: () {
           log("adding media");
-          if (newMedia.contains(media)) {
-            newMedia.remove(media);
+          if (selectedMedia.contains(media)) {
+            selectedMedia.remove(media);
           } else {
-            newMedia.add(media);
+            selectedMedia.add(media);
           }
-          log(newMedia.toString());
+          log(selectedMedia.toString());
           setState(() {});
         },
         child: Stack(
           children: <Widget>[
             MediaIcon(media, jwt),
-            if (newMedia.contains(media))
+            if (selectedMedia.contains(media))
               const Align(
                 alignment: Alignment.topRight,
                 child: Icon(Icons.add_circle_outline),
@@ -136,12 +136,11 @@ class _CollectionMediaManagerAddState extends State<CollectionMediaManagerAdd> {
 
   @override
   Widget build(BuildContext context) {
-    if (mode == "") {
-      // Don't do this a 2nd time
+    if (jwt == "") {
+      // Only run this once
       if (ModalRoute.of(context)!.settings.arguments != null) {
         var args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
         collection = args["collection"];
-        mode = args["mode"];
         jwt = args["jwt"];
       } else {
         collection = Collection("", "", "", false, []);
@@ -159,7 +158,7 @@ class _CollectionMediaManagerAddState extends State<CollectionMediaManagerAdd> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Select media to " + (mode == "add" ? "add" : "remove")),
+        title: const Text("Select media to add", style: TextStyle(fontSize: 16)),
         centerTitle: true,
         actions: [
           IconButton(
@@ -184,13 +183,13 @@ class _CollectionMediaManagerAddState extends State<CollectionMediaManagerAdd> {
         ),
         Expanded(
           child: initialDataPending
-              ? Text("Loading...")
+              ? const Text("Loading...")
               : Column(
                   children: [
                     TextButton(
                       child: const Text("Save"),
                       onPressed: () async {
-                        if (await collection.addMedia(newMedia)) {
+                        if (await collection.addMedia(selectedMedia)) {
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(content: Text('Media added successfully.')));
                           Navigator.pop(context);
@@ -204,7 +203,7 @@ class _CollectionMediaManagerAddState extends State<CollectionMediaManagerAdd> {
                       shrinkWrap: true,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: _gridSize),
                       itemBuilder: (BuildContext context, int index) {
-                        return _createTappableMediaIcon(context, media[index], newMedia);
+                        return _createTappableMediaIcon(media[index]);
                       },
                       itemCount: media.length,
                     ),

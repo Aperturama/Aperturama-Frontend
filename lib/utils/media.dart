@@ -176,10 +176,10 @@ class Collection {
   String sharingLink = "";
   List<String> sharingUsers = [];
 
-  List<Media> images = []; // may also be previewImages and the rest gathered
+  List<Media> media = []; // may also be previewImages and the rest gathered
   // in collection_viewer, which is probably better. new field needed though
 
-  Collection(this.name, this.information, this.id, this.shared, this.images);
+  Collection(this.name, this.information, this.id, this.shared, this.media);
 
 
   Future<bool> regenerateSharedLink() async {
@@ -293,16 +293,16 @@ class Collection {
     }
   }
 
-  Future<bool> addMedia(List<Media> newMedia) async {
+  Future<bool> addMedia(List<Media> media) async {
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
     String jwt = await User.getJWT();
     http.Response resp;
-    for (int i = 0; i < newMedia.length; i++) {
+    for (int i = 0; i < media.length; i++) {
       try {
         resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections/' + id),
             headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt},
-            body: { "media_id": newMedia[i].id }
+            body: { "media_id": media[i].id }
         );
 
         if (resp.statusCode != 200) {
@@ -319,27 +319,29 @@ class Collection {
     return true;
   }
 
-  Future<bool> removeMedia() async {
+  Future<bool> removeMedia(List<Media> media) async {
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
     String jwt = await User.getJWT();
     http.Response resp;
-    try {
-      resp = await http.delete(Uri.parse(serverAddress + '/api/v1/collections/' + id),
-        headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
-      );
+    for (int i = 0; i < media.length; i++) {
+      try {
+        resp = await http.delete(Uri.parse(serverAddress + '/api/v1/collections/' + id + "/media/" + media[i].id),
+            headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt},
+        );
 
-      if(resp.statusCode != 200) {
-        log("delete Non 200 status code: " + resp.statusCode.toString());
+        if (resp.statusCode != 200) {
+          log("removeMedia Non 200 status code: " + resp.statusCode.toString());
+          return false;
+        }
+        // else continue to add the rest of the media
+
+      } on SocketException {
+        log("removeMedia socket exception");
         return false;
-      } else {
-        return true;
       }
-
-    } on SocketException {
-      log("delete socket exception");
-      return false;
     }
+    return true;
   }
 }
 
