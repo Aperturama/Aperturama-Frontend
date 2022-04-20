@@ -342,7 +342,7 @@ class _AutoUploadState extends State<AutoUpload> {
                         leading: SizedBox(
                             width: 56,
                             height: 56,
-                            child: MediaIcon(recentlyUploaded[index], jwt)),
+                            child: MediaIcon(recentlyUploaded[index], jwt, "")),
                         title: Text(recentlyUploaded[index].localPath),
                         subtitle: Text("Uploaded: " +
                             recentlyUploaded[index].uploadedTimestamp.year.toString() + "/" +

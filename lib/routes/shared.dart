@@ -38,7 +38,7 @@ class _SharedState extends State<Shared> {
     jwt = await User.getJWT();
     http.Response resp;
     try {
-      resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
+      resp = await http.get(Uri.parse(serverAddress + '/api/v1/media/shared'),
           headers: {
             HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
           });
@@ -69,7 +69,7 @@ class _SharedState extends State<Shared> {
 
     // Send a request to the backend
     try {
-      resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections'),
+      resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/shared'),
           headers: {
             HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
           });
@@ -218,7 +218,7 @@ class _SharedState extends State<Shared> {
                         contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
                         subtitle: Text(snapshot.data!.media.length.toString() + " photos shared with you"),
                       ),
-                     MediaGrid(snapshot.data!.media, _gridSize, jwt),
+                     MediaGrid(snapshot.data!.media, _gridSize, jwt, ""),
                     ],
                   ),
                 );

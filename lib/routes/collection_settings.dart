@@ -57,6 +57,9 @@ class _CollectionSettingsState extends State<CollectionSettings> {
         collection.sharingCode = responseJson["code"];
         collection.sharingLink = serverAddress + "/#/s?collection=" + collection.id + "&code=" + collection.sharingCode;
       }
+      for(int i = 0; i < responseJson["sharing"].length; i++) {
+        collection.sharingUsers.add(responseJson["sharing"][i]["email"]);
+      }
       sharingLinkController.text = collection.sharingLink;
       initialDataPending = false;
       setState(() {});
@@ -170,14 +173,15 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                               return Row(
                                 children: [
                                   Text(collection.sharingUsers[index]),
+                                  const SizedBox(width: 20),
                                   Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
                                   Switch(
                                     value: sharingCanEdit,
                                     onChanged: (value) async {
+                                      sharingCanEdit = value;
                                       if (await collection.shareWithUser(sharingUserController.text, sharingCanEdit)) {
                                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                             content: Text('Media shared with ' + sharingUserController.text + '.')));
-                                        sharingUserController.text = "";
                                         setState(() {});
                                       } else {
                                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -190,14 +194,13 @@ class _CollectionSettingsState extends State<CollectionSettings> {
                                     icon: const Icon(Icons.remove_circle_outline),
                                     onPressed: () async {
                                       if (await collection.unshareWithUser(collection.sharingUsers[index])) {
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                            content: Text(
-                                                'Collection unshared with ' + collection.sharingUsers[index] + '.')));
+                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                            content: Text('Collection unshared with user.')));
+                                        setState(() {});
                                       } else {
                                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                             content: Text('Failed to unshare collection with ' +
-                                                collection.sharingUsers[index] +
-                                                '.')));
+                                                collection.sharingUsers[index] + '.')));
                                       }
                                     },
                                   ),

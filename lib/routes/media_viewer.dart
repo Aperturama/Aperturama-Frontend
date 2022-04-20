@@ -60,7 +60,7 @@ class _MediaViewerState extends State<MediaViewer> {
           title: const Text("Media Viewer"),
           centerTitle: true,
           actions: [
-            IconButton(
+            (code != "") ? const Text("") : IconButton( // Hide settings if the code is used
               icon: const Icon(Icons.settings),
               onPressed: () {
                 Navigator.pushNamed(
@@ -83,7 +83,7 @@ class _MediaViewerState extends State<MediaViewer> {
               maxScale: _maxScale,
               child: CachedNetworkImage(
                 httpHeaders: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
-                imageUrl: media.highresURL,
+                imageUrl: media.highresURL + "?code=" + code,
                 // Make the image fit the width
                 imageBuilder: (context, imageProvider) {
                   WidgetsBinding.instance?.addPostFrameCallback((_) => setState(() {
@@ -105,7 +105,7 @@ class _MediaViewerState extends State<MediaViewer> {
                     // Low-res thumbnail
                     CachedNetworkImage(
                       httpHeaders: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
-                      imageUrl: media.thumbnailURL,
+                      imageUrl: media.thumbnailURL + "?code=" + code,
                       progressIndicatorBuilder: (context, url, downloadProgress) =>
                           CircularProgressIndicator(
                               value: downloadProgress.progress),

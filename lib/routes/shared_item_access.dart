@@ -63,6 +63,7 @@ class _SharedItemAccessState extends State<SharedItemAccess> {
             Navigator.pushNamed(context, '/collection_viewer', arguments: <String, dynamic>{
               'collection': c,
               'jwt': "",
+              'code': widget.code,
             });
           }
 
@@ -85,12 +86,16 @@ class _SharedItemAccessState extends State<SharedItemAccess> {
         Navigator.pushNamed(context, '/media_viewer', arguments: <String, dynamic>{
           'media': m,
           'jwt': "",
+          'code': widget.code,
         });
 
       } else {
         // Seems they did something wrong, like having both/no collection and/or media set
         // Show the error message
         initialDataPending = false;
+        setState(() {
+
+        });
       }
     }
   }

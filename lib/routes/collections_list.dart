@@ -157,7 +157,7 @@ class CollectionList extends StatelessWidget {
               shrinkWrap: true,
               crossAxisCount: 4,
               children: List.generate(math.min(4, collection.media.length), (index) {
-                return MediaIcon(collection.media[index], jwt);
+                return MediaIcon(collection.media[index], jwt, "");
               }),
             ),
             ListTile(

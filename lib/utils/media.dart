@@ -74,7 +74,7 @@ class Media {
         log(data.toString());
 
         // Success, save info
-        sharingLink = data["code"];
+        sharingLink = serverAddress + "/#/s?media=" + id + "&code=" + data["code"];
         return true;
       }
 
@@ -84,7 +84,7 @@ class Media {
     }
   }
 
-  Future<bool> shareWithUser(String email, bool editable) async {
+  Future<bool> shareWithUser(String email) async {
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
     String jwt = await User.getJWT();
@@ -100,11 +100,10 @@ class Media {
         return false;
 
       } else {
-        final data = jsonDecode(resp.body);
-        log(data.toString());
-
         // Success, save info
-        sharingUsers.add(email);
+        if(!sharingUsers.contains(email)) {
+          sharingUsers.add(email);
+        }
         return true;
       }
 
@@ -131,9 +130,6 @@ class Media {
             resp.statusCode.toString());
         return false;
       } else {
-        final data = jsonDecode(resp.body);
-        log(data.toString());
-
         // Success, save info
         sharingUsers.remove(email);
         return true;
@@ -287,7 +283,7 @@ class Collection {
     try {
       resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections/' + id + "/share/user"),
           headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
-          body: { "email": email }
+          body: { "email": email, "canAdd": editable.toString(), "canRemove": editable.toString() }
       );
 
       if(resp.statusCode != 200) {
@@ -295,9 +291,6 @@ class Collection {
         return false;
 
       } else {
-        final data = jsonDecode(resp.body);
-        log(data.toString());
-
         // Success, save info
         sharingUsers.add(email);
         return true;
@@ -326,9 +319,6 @@ class Collection {
             resp.statusCode.toString());
         return false;
       } else {
-        final data = jsonDecode(resp.body);
-        log(data.toString());
-
         // Success, save info
         sharingUsers.remove(email);
         return true;

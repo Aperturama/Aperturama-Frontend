@@ -55,6 +55,9 @@ class _MediaSettingsState extends State<MediaSettings> {
       if (media.shared) {
         media.sharingLink = serverAddress + "/#/s?media=" + media.id + "&code=" + responseJson["code"];
       }
+      for(int i = 0; i < responseJson["sharing"].length; i++) {
+        if(responseJson["sharing"][i].containsKey("email") && !media.sharingUsers.contains(responseJson["sharing"][i]["email"])) media.sharingUsers.add(responseJson["sharing"][i]["email"]);
+      }
       media.uploadedTimestamp = DateTime.parse(responseJson["date_uploaded"]);
 
       initialDataPending = false;
@@ -189,34 +192,18 @@ class _MediaSettingsState extends State<MediaSettings> {
                                 return Row(
                                   children: [
                                     Text(media.sharingUsers[index]),
-                                    Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
-                                    Switch(
-                                      value: sharingCanEdit,
-                                      onChanged: (value) async {
-                                        if (await media.shareWithUser(sharingUserController.text, sharingCanEdit)) {
-                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                              content: Text('Media shared with ' + sharingUserController.text + '.')));
-                                          sharingUserController.text = "";
-                                          setState(() {});
-                                        } else {
-                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                              content:
-                                              Text('Failed to share media with ' + sharingUserController.text + '.')));
-                                        }
-                                      },
-                                    ),
+                                    const SizedBox(width: 20),
                                     IconButton(
                                       icon: const Icon(Icons.remove_circle_outline),
                                       onPressed: () async {
                                         if (await media.unshareWithUser(media.sharingUsers[index])) {
-                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                              content: Text(
-                                                  'Collection unshared with ' + media.sharingUsers[index] + '.')));
+                                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                              content: Text('Media unshared with user.')));
+                                          setState(() {});
                                         } else {
                                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                              content: Text('Failed to unshare collection with ' +
-                                                  media.sharingUsers[index] +
-                                                  '.')));
+                                              content: Text('Failed to unshare media with ' +
+                                                  media.sharingUsers[index] + '.')));
                                         }
                                       },
                                     ),
@@ -237,19 +224,10 @@ class _MediaSettingsState extends State<MediaSettings> {
                               controller: sharingUserController,
                             ),
                             Row(children: [
-                              Text('Can Edit:', style: Theme.of(context).textTheme.bodyText1),
-                              Switch(
-                                value: sharingCanEdit,
-                                onChanged: (value) {
-                                  setState(() {
-                                    sharingCanEdit = value;
-                                  });
-                                },
-                              ),
                               TextButton(
                                 child: const Text('Share'),
                                 onPressed: () async {
-                                  if (await media.shareWithUser(sharingUserController.text, sharingCanEdit)) {
+                                  if (await media.shareWithUser(sharingUserController.text)) {
                                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                         content: Text('Media shared with ' + sharingUserController.text + '.')));
                                     sharingUserController.text = "";

@@ -98,7 +98,7 @@ class _CollectionViewerState extends State<CollectionViewer> {
                   transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
                   child: Text(collection.shared ? "Shared" : "Not Shared"),
                 ),
-                trailing: TextButton(
+                trailing: (code != "") ? null : TextButton( // Hide settings if the code is used
                   child: const Text('Settings'),
                   onPressed: () {
                     Navigator.pushNamed(context, '/collection_settings',
@@ -114,7 +114,7 @@ class _CollectionViewerState extends State<CollectionViewer> {
               contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
             ),
             Expanded(
-              child: MediaGrid(collection.media, _gridSize, jwt),
+              child: MediaGrid(collection.media, _gridSize, jwt, code),
             ),
           ],
         ));

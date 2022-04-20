@@ -24,6 +24,7 @@ class _MediaListState extends State<MediaList> {
   int _gridSize = 0; // Start at 0 and set during the first build
   int _gridSizeMax = 0; // Start at 0 and set during the first build
   String jwt = "";
+  String code = "";
 
   // TODO: Enable swipe down to reload
 
@@ -141,7 +142,7 @@ class _MediaListState extends State<MediaList> {
               future: _getMediaList(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return MediaGrid(snapshot.data!, _gridSize, jwt);
+                  return MediaGrid(snapshot.data!, _gridSize, jwt, code);
                 } else if (snapshot.hasError) {
                   return const Text("Error");
                 }
@@ -155,11 +156,12 @@ class _MediaListState extends State<MediaList> {
 }
 
 class MediaGrid extends StatelessWidget {
-  const MediaGrid(this.media, this.gridSize, this.jwt, {Key? key}) : super(key: key);
+  const MediaGrid(this.media, this.gridSize, this.jwt, this.code, {Key? key}) : super(key: key);
 
   final List<Media> media;
   final int gridSize;
   final String jwt;
+  final String code;
 
   Widget _createTappableMediaIcon(BuildContext context, Media media) {
     // Make a nice button that has the thumbnail inside it
@@ -174,7 +176,7 @@ class MediaGrid extends StatelessWidget {
               'code': "",
             },
           )},
-      child: MediaIcon(media, jwt),
+      child: MediaIcon(media, jwt, code),
     );
   }
 
@@ -196,10 +198,11 @@ class MediaGrid extends StatelessWidget {
 }
 
 class MediaIcon extends StatelessWidget {
-  const MediaIcon(final this.media, this.jwt, {Key? key}) : super(key: key);
+  const MediaIcon(final this.media, this.jwt, this.code, {Key? key}) : super(key: key);
 
   final Media media;
   final String jwt;
+  final String code;
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +214,7 @@ class MediaIcon extends StatelessWidget {
       child: Center(
         child: CachedNetworkImage(
           httpHeaders: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
-            imageUrl: media.thumbnailURL,
+            imageUrl: media.thumbnailURL + "?code=" + code,
             progressIndicatorBuilder: (context, url, downloadProgress) =>
                 SizedBox(
                     width: 32,
