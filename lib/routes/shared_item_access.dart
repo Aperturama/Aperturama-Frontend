@@ -15,218 +15,97 @@ import '../utils/main_drawer.dart';
 import '../utils/user.dart';
 
 class SharedItemAccess extends StatefulWidget {
-  const SharedItemAccess({Key? key}) : super(key: key);
+  const SharedItemAccess({Key? key, required this.code, required this.collection, required this.media})
+      : super(key: key);
+
+  final String code;
+  final String collection;
+  final String media;
 
   @override
   State<SharedItemAccess> createState() => _SharedItemAccessState();
 }
 
 class _SharedItemAccessState extends State<SharedItemAccess> {
-  int _gridSize = 0; // Start at 0 and set during the first build
-  int _gridSizeMax = 0; // Start at 0 and set during the first build
+  bool initialDataPending = true;
 
-  // TODO: Enable swipe down to reload
-
-  // Store the URLs for all the photos the app needs to download and cache
-  Future<MediaCollectionsLists> _getSharedList() async {
-    List<Media> media = [];
-
-    // Send a request to the backend
-    String serverAddress = await User.getServerAddress();
-    String jwt = await User.getJWT();
-    http.Response resp;
-    try {
-      resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
-          headers: {
-            HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
-          });
-
-      if(resp.statusCode != 200) {
-        log("Media listing failed: Code " + resp.statusCode.toString());
-      } else {
-        log(resp.body);
-        final responseJson = jsonDecode(resp.body);
-        log(resp.body);
-
-        // For each media item we got
-        for (int i = 0; i < responseJson.length; i++) {
-          media.add(Media(
-            responseJson[i].media_id, MediaType.photo,
-            serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/thumbnail',
-            serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/media',
-          ));
-        }
-      }
-
-    } on SocketException {
-      log("Media listing failed: Socket exception");
-    }
-
-
-    List<Collection> collections = [];
-
-    // Send a request to the backend
-    try {
-      resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections'),
-          headers: {
-            HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
-          });
-
-      if(resp.statusCode != 200) {
-        log("Collection listing failed: Code " + resp.statusCode.toString());
-      } else {
-
-        log(resp.body);
-        final responseJson = jsonDecode(resp.body);
-        log(responseJson);
-
-        // For each collection item we got
-        for (int i = 0; i < responseJson.length; i++) {
-          // Find all the photos
-          // Send a request to the backend
-          List<Media> m = [];
-          try {
-            resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + responseJson.collection_id),
-                headers: {
-                  HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
-                });
-
-            if(resp.statusCode != 200) {
-              log("Collection media listing failed: Code " + resp.statusCode.toString());
-            } else {
-              log(resp.body);
-              final responseJson2 = jsonDecode(resp.body);
-              log(responseJson2);
-
-              final cmedia = responseJson2.media;
-              for (int k = 0; k < cmedia.length; k++) {
-                m.add(Media(
-                  cmedia[i].media_id, MediaType.photo,
-                  serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/thumbnail',
-                  serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/media',
-                ));
-              }
-
-              // Save the collection
-              collections.add(Collection(
-                responseJson[i].collection_id, "", responseJson[i].name,
-                false,
-                m,
-              ));
-            }
-          } on SocketException {
-            log("Collection media listing failed: Socket exception");
-          }
-
-        }
-      }
-
-    } on SocketException {
-      log("Collection listing failed: Socket exception");
-    }
-
-    // TODO: Save and load from disk if network is unavailable
-
-    MediaCollectionsLists sd = MediaCollectionsLists(collections, media);
-
-    return sd;
+  @override
+  void initState() {
+    super.initState();
+    redirect();
   }
 
-  // Function to handle changing the size of the photo grid
-  void _changeGridSize(int amount) {
-    // Make sure the grid size can't go below 1 or above the max size
+  Future<void> redirect() async {
+    // Check to make sure there's a code
+    if (widget.code == "") {
+      // Actually just end here, this will show the error message
+      initialDataPending = false;
+    } else {
+      // There is a code, let's see if we've got a collection or media
+      if (widget.collection != "" && widget.media == "") {
+        // This is a collection, we need to query for it
+        http.Response resp;
+        try {
+          resp = await http.get(Uri.parse('/api/v1/collections/' + widget.collection));
 
-    if (_gridSize > 10) {
-      amount *= kIsWeb ? 2 : 1;
-    }
+          if(resp.statusCode != 200) {
+            log("Collection listing failed: Code " + resp.statusCode.toString());
+            // Show the error message
+            initialDataPending = false;
 
-    if (amount < 0) {
-      if (_gridSize + amount <= 0) {
-        _gridSize = 1;
+          } else {
+            // Got the data
+            log(resp.body);
+            final responseJson = jsonDecode(resp.body);
+            Collection c = Collection(responseJson["name"], "", widget.collection, false, responseJson["media"]);
+
+            // Let's go there
+            Navigator.pushNamed(context, '/collection_viewer', arguments: <String, dynamic>{
+              'collection': c,
+              'jwt': "",
+            });
+          }
+
+        } on SocketException {
+          log("Collection listing failed: Socket exception");
+          // Show the error message
+          initialDataPending = false;
+        }
+
+      } else if (widget.collection == "" && widget.media != "") {
+        // This is a media item
+
+        Media m = Media(
+          widget.media, MediaType.photo,
+          "/api/v1/media/" + widget.media + '/thumbnail',
+          "/api/v1/media/" + widget.media + '/media',
+        );
+
+        // Let's go there
+        Navigator.pushNamed(context, '/media_viewer', arguments: <String, dynamic>{
+          'media': m,
+          'jwt': "",
+        });
+
       } else {
-        _gridSize += amount;
-      }
-    } else if (amount > 0) {
-      if (_gridSize + amount >= _gridSizeMax) {
-        _gridSize = _gridSizeMax;
-      } else {
-        _gridSize += amount;
+        // Seems they did something wrong, like having both/no collection and/or media set
+        // Show the error message
+        initialDataPending = false;
       }
     }
-    setState(() {
-      _gridSize;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Set up the initial grid sizing
-    // TODO: This doesn't reload when a web browser's size is changed, should probably be fixed
-    if (_gridSize == 0 && _gridSizeMax == 0) {
-      double width = MediaQuery.of(context).size.width;
-      _gridSize = math.max(4, (width / 200.0).round());
-      _gridSizeMax = math.max(8, (width / 100.0).round());
-      debugPrint('$width $_gridSize $_gridSizeMax');
-    }
-
     return Scaffold(
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
           title: const Text("Shared Media"),
           centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.remove_circle_outline),
-              onPressed: () {
-                _changeGridSize(1);
-              },
-              tooltip: 'Decrease Image Size',
-            ),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {
-                _changeGridSize(-1);
-              },
-              tooltip: 'Increase Image Size',
-            ),
-          ],
         ),
-        body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            child: kIsWeb ? const MainDrawer() : null,
-          ),
-          FutureBuilder<MediaCollectionsLists>(
-            future: _getSharedList(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Expanded(
-                  child: ListView(
-                    children: [
-                      ListTile(
-                        horizontalTitleGap: 0,
-                        title: const Text("Collections"),
-                        contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
-                        subtitle: Text(snapshot.data!.collections.length.toString() + " collections shared with you"),
-                      ),
-                      CollectionList(snapshot.data!.collections),
-                      ListTile(
-                        horizontalTitleGap: 0,
-                        title: const Text("Photos"),
-                        contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
-                        subtitle: Text(snapshot.data!.media.length.toString() + " photos shared with you"),
-                      ),
-                     MediaGrid(snapshot.data!.media, _gridSize),
-                    ],
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return const Text("Error");
-              }
-              return const Text("Loading...");
-            },
-          ),
-        ]),
-        drawer: kIsWeb ? null : const MainDrawer());
+        body: (initialDataPending)
+            ? const Center(child: CircularProgressIndicator())
+            : const Text("Shared media item not found"));
   }
 }

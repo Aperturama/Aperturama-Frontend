@@ -23,6 +23,8 @@ class MediaViewer extends StatefulWidget {
 class _MediaViewerState extends State<MediaViewer> {
   double _maxScale = 1;
   late final Media media;
+  String jwt = "";
+  String code = "";
 
   // Load info on first load
   @override
@@ -32,7 +34,10 @@ class _MediaViewerState extends State<MediaViewer> {
     // Take in information about the current media given as args,
     // or set it to no media if the args are invalid for some reason
     if(ModalRoute.of(context)!.settings.arguments != null) {
-      media = ModalRoute.of(context)!.settings.arguments as Media;
+      var args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      media = args["media"];
+      jwt = args.containsKey("jwt") ? args["jwt"] : "";
+      code = args.containsKey("code") ? args["code"] : "";
     } else {
       media = Media("", MediaType.photo, "", "");
       // Todo: Probably navigate back to the /photos page

@@ -39,27 +39,29 @@ class _MediaListState extends State<MediaList> {
       log("JWT: " + jwt);
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
         headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt });
+
+      if(resp.statusCode != 200) {
+        log("Media listing failed: Code " + resp.statusCode.toString());
+        return media;
+      }
+
+      log(resp.body);
+      final responseJson = jsonDecode(resp.body);
+
+      // For each media item we got
+      for (int i = 0; i < responseJson.length; i++) {
+        media.add(Media(
+          responseJson[i].media_id, MediaType.photo,
+          serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/thumbnail',
+          serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/media',
+        ));
+      }
+
     } on SocketException {
       log("Media listing failed: Socket exception");
       return media;
     }
 
-    if(resp.statusCode != 200) {
-      log("Media listing failed: Code " + resp.statusCode.toString());
-      return media;
-    }
-
-    log(resp.body);
-    final responseJson = jsonDecode(resp.body);
-
-    // For each media item we got
-    for (int i = 0; i < responseJson.length; i++) {
-      media.add(Media(
-        responseJson[i].media_id, MediaType.photo,
-        serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/thumbnail',
-        serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/media',
-      ));
-    }
 
     // TODO: Save and load from disk if network is unavailable
 

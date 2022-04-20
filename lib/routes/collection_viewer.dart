@@ -17,6 +17,7 @@ class _CollectionViewerState extends State<CollectionViewer> {
   int _gridSize = 0; // Start at 0 and set during the first build
   int _gridSizeMax = 0; // Start at 0 and set during the first build
   String jwt = "";
+  String code = "";
 
   // Function to handle changing the size of the photo grid
   void _changeGridSize(int amount) {
@@ -50,7 +51,8 @@ class _CollectionViewerState extends State<CollectionViewer> {
     if(ModalRoute.of(context)!.settings.arguments != null) {
       var args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
       collection = args["collection"];
-      jwt = args["jwt"];
+      jwt = args.containsKey("jwt") ? args["jwt"] : "";
+      code = args.containsKey("code") ? args["code"] : "";
     } else {
       collection = Collection("", "", "", false, []);
       // Todo: Probably navigate back to the /collections page

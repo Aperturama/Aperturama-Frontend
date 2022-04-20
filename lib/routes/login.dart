@@ -17,11 +17,16 @@ class _AppLoginState extends State<AppLogin> {
   String email = "";
   String password = "";
   String serverAddress = "";
+  String jwt = "";
   bool initialDataPending = true;
 
   void _populateInfo() async {
     serverAddress = await User.getServerAddress();
     email = await User.getEmail();
+    jwt = await User.getJWT();
+    if(jwt != "") {
+      Navigator.pushReplacementNamed(context, '/media');
+    }
     initialDataPending = false;
     setState(() {});
   }

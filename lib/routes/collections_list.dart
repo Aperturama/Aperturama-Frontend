@@ -60,33 +60,35 @@ class _CollectionsState extends State<Collections> {
             headers: {
               HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
             });
+
+        if(resp.statusCode != 200) {
+          log("Collection media listing failed: Code " + resp.statusCode.toString());
+          return collections;
+        }
+
+        log(resp.body);
+        final responseJson2 = jsonDecode(resp.body);
+        List<Media> m = [];
+
+        if(responseJson2.length > 0 && responseJson2.containsKey("media")) {
+          final cmedia = responseJson2["media"];
+          for (int k = 0; k < cmedia.length; k++) {
+            m.add(Media(
+              cmedia[i].media_id, MediaType.photo,
+              serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/thumbnail',
+              serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/media',
+            ));
+          }
+        }
+
+        // Save the collection
+        collections.add(Collection(responseJson[i]["name"], "", responseJson[i]["collection_id"].toString(), false, m));
+
       } on SocketException {
         log("Collection media listing failed: Socket exception");
         return collections;
       }
 
-      if(resp.statusCode != 200) {
-        log("Collection media listing failed: Code " + resp.statusCode.toString());
-        return collections;
-      }
-
-      log(resp.body);
-      final responseJson2 = jsonDecode(resp.body);
-      List<Media> m = [];
-
-      if(responseJson2.length > 0 && responseJson2.containsKey("media")) {
-        final cmedia = responseJson2["media"];
-        for (int k = 0; k < cmedia.length; k++) {
-          m.add(Media(
-            cmedia[i].media_id, MediaType.photo,
-            serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/thumbnail',
-            serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/media',
-          ));
-        }
-      }
-
-      // Save the collection
-      collections.add(Collection(responseJson[i]["name"], "", responseJson[i]["collection_id"].toString(), false, m));
     }
 
     // TODO: Save and load from disk if network is unavailable
