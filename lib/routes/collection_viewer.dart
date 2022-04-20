@@ -16,6 +16,7 @@ class CollectionViewer extends StatefulWidget {
 class _CollectionViewerState extends State<CollectionViewer> {
   int _gridSize = 0; // Start at 0 and set during the first build
   int _gridSizeMax = 0; // Start at 0 and set during the first build
+  String jwt = "";
 
   // Function to handle changing the size of the photo grid
   void _changeGridSize(int amount) {
@@ -47,7 +48,9 @@ class _CollectionViewerState extends State<CollectionViewer> {
   Widget build(BuildContext context) {
     final Collection collection;
     if(ModalRoute.of(context)!.settings.arguments != null) {
-      collection = ModalRoute.of(context)!.settings.arguments as Collection;
+      var args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      collection = args["collection"];
+      jwt = args["jwt"];
     } else {
       collection = Collection("", "", "", false, []);
       // Todo: Probably navigate back to the /collections page
@@ -96,7 +99,12 @@ class _CollectionViewerState extends State<CollectionViewer> {
                 trailing: TextButton(
                   child: const Text('Settings'),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/collection_settings', arguments: collection);
+                    Navigator.pushNamed(context, '/collection_settings',
+                      arguments: <String, dynamic>{
+                        'collection': collection,
+                        'jwt': jwt,
+                      },
+                    );
                   },
                 ),
               ),
@@ -104,7 +112,7 @@ class _CollectionViewerState extends State<CollectionViewer> {
               contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
             ),
             Expanded(
-              child: MediaGrid(collection.images, _gridSize),
+              child: MediaGrid(collection.images, _gridSize, jwt),
             ),
           ],
         ));

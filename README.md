@@ -1,6 +1,16 @@
 # Aperturama-Frontend
 
 
+# Build info
+Run these commands:
+```
+flutter pub get
+flutter pub run flutter_launcher_icons:main
+flutter pub pub run flutter_launcher_icons:mainflutter clean
+flutter build apk --release
+flutter build web --release
+```
+
 
 # Potential Future Improvements
 - Collection cards as a grid (not implemented due to issues with height being equal to width and being unable to fix that)

@@ -171,11 +171,11 @@ class Collection {
   String information;
   final String id;
 
-  late bool shared;
-  late String sharingLink;
-  late List<String> sharingUsers;
+  bool shared = false;
+  String sharingLink = "";
+  List<String> sharingUsers = [];
 
-  final List<Media> images; // may also be previewImages and the rest gathered
+  List<Media> images = []; // may also be previewImages and the rest gathered
   // in collection_viewer, which is probably better. new field needed though
 
   Collection(this.name, this.information, this.id, this.shared, this.images);
@@ -270,6 +270,55 @@ class Collection {
   }
 
   Future<bool> delete() async {
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.delete(Uri.parse(serverAddress + '/api/v1/collections/' + id),
+        headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
+      );
+
+      if(resp.statusCode != 200) {
+        log("delete Non 200 status code: " + resp.statusCode.toString());
+        return false;
+      } else {
+        return true;
+      }
+
+    } on SocketException {
+      log("delete socket exception");
+      return false;
+    }
+  }
+
+  Future<bool> addMedia(List<Media> newMedia) async {
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    for (int i = 0; i < newMedia.length; i++) {
+      try {
+        resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections/' + id),
+            headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt},
+            body: { "media_id": newMedia[i].id }
+        );
+
+        if (resp.statusCode != 200) {
+          log("addMedia Non 200 status code: " + resp.statusCode.toString());
+          return false;
+        }
+        // else continue to add the rest of the media
+
+      } on SocketException {
+        log("addMedia socket exception");
+        return false;
+      }
+    }
+    return true;
+  }
+
+  Future<bool> removeMedia() async {
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
     String jwt = await User.getJWT();

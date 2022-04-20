@@ -25,6 +25,8 @@ class _SharedState extends State<Shared> {
   int _gridSize = 0; // Start at 0 and set during the first build
   int _gridSizeMax = 0; // Start at 0 and set during the first build
 
+  String jwt = "";
+
   // TODO: Enable swipe down to reload
 
   // Store the URLs for all the photos the app needs to download and cache
@@ -33,7 +35,7 @@ class _SharedState extends State<Shared> {
 
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
-    String jwt = await User.getJWT();
+    jwt = await User.getJWT();
     http.Response resp;
     try {
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
@@ -78,7 +80,7 @@ class _SharedState extends State<Shared> {
 
         log(resp.body);
         final responseJson = jsonDecode(resp.body);
-        log(responseJson);
+
 
         // For each collection item we got
         for (int i = 0; i < responseJson.length; i++) {
@@ -209,14 +211,14 @@ class _SharedState extends State<Shared> {
                         contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
                         subtitle: Text(snapshot.data!.collections.length.toString() + " collections shared with you"),
                       ),
-                      CollectionList(snapshot.data!.collections),
+                      CollectionList(snapshot.data!.collections, jwt),
                       ListTile(
                         horizontalTitleGap: 0,
                         title: const Text("Photos"),
                         contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
                         subtitle: Text(snapshot.data!.media.length.toString() + " photos shared with you"),
                       ),
-                     MediaGrid(snapshot.data!.media, _gridSize),
+                     MediaGrid(snapshot.data!.media, _gridSize, jwt),
                     ],
                   ),
                 );

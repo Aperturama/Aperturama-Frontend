@@ -1,4 +1,5 @@
 import 'package:aperturama/routes/collection_creator.dart';
+import 'package:aperturama/routes/collection_media_manager.dart';
 import 'package:aperturama/routes/collection_settings.dart';
 import 'package:aperturama/routes/login.dart';
 import 'package:aperturama/routes/media_settings.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         '/collections/new': (context) => const CollectionCreator(),
         '/collection_viewer': (context) => const CollectionViewer(),
         '/collection_settings': (context) => const CollectionSettings(),
+        '/collection_media_manager': (context) => const CollectionMediaManager(),
         '/shared': (context) => const Shared(),
         '/auto_upload': (context) => const AutoUpload(),
         '/settings': (context) => const AppSettings(),

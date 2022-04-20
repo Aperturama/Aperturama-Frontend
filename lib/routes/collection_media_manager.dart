@@ -13,16 +13,19 @@ import 'package:aperturama/utils/media.dart';
 import '../utils/main_drawer.dart';
 import '../utils/user.dart';
 
-class MediaList extends StatefulWidget {
-  const MediaList({Key? key}) : super(key: key);
+class CollectionMediaManager extends StatefulWidget {
+  const CollectionMediaManager({Key? key}) : super(key: key);
 
   @override
-  State<MediaList> createState() => _MediaListState();
+  State<CollectionMediaManager> createState() => _CollectionMediaManagerState();
 }
 
-class _MediaListState extends State<MediaList> {
+class _CollectionMediaManagerState extends State<CollectionMediaManager> {
   int _gridSize = 0; // Start at 0 and set during the first build
   int _gridSizeMax = 0; // Start at 0 and set during the first build
+
+  List<Media> newMedia = [];
+
   String jwt = "";
 
   // TODO: Enable swipe down to reload
@@ -33,29 +36,31 @@ class _MediaListState extends State<MediaList> {
 
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
-    jwt = await User.getJWT();
+    String jwt = await User.getJWT();
     http.Response resp;
     try {
       log("JWT: " + jwt);
-      resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
-        headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt });
+      resp = await http
+          .get(Uri.parse(serverAddress + '/api/v1/media'), headers: {HttpHeaders.authorizationHeader: 'Bearer ' + jwt});
     } on SocketException {
       log("Media listing failed: Socket exception");
       return media;
     }
 
-    if(resp.statusCode != 200) {
+    if (resp.statusCode != 200) {
       log("Media listing failed: Code " + resp.statusCode.toString());
       return media;
     }
 
     log(resp.body);
     final responseJson = jsonDecode(resp.body);
+    log(resp.body);
 
     // For each media item we got
     for (int i = 0; i < responseJson.length; i++) {
       media.add(Media(
-        responseJson[i].media_id, MediaType.photo,
+        responseJson[i].media_id,
+        MediaType.photo,
         serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/thumbnail',
         serverAddress + "/api/v1/media/" + responseJson[i].media_id + '/media',
       ));
@@ -94,14 +99,16 @@ class _MediaListState extends State<MediaList> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final Collection collection;
+    if (ModalRoute.of(context)!.settings.arguments != null) {
+      var args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      collection = args["collection"];
+      jwt = args["jwt"];
+    } else {
+      collection = Collection("", "", "", false, []);
+      // Todo: Probably navigate back to the /collections page
+    }
 
-    // Set up the initial grid sizing
     // TODO: This doesn't reload when a web browser's size is changed, should probably be fixed
     if (_gridSize == 0 && _gridSizeMax == 0) {
       double width = MediaQuery.of(context).size.width;
@@ -111,77 +118,92 @@ class _MediaListState extends State<MediaList> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: const Text("Aperturama"),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.remove_circle_outline),
-              onPressed: () {
-                _changeGridSize(1);
-              },
-              tooltip: 'Decrease Image Size',
-            ),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {
-                _changeGridSize(-1);
-              },
-              tooltip: 'Increase Image Size',
-            ),
-          ],
+      appBar: AppBar(
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: const Text("Select media to add..."),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.remove_circle_outline),
+            onPressed: () {
+              _changeGridSize(1);
+            },
+            tooltip: 'Decrease Image Size',
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline),
+            onPressed: () {
+              _changeGridSize(-1);
+            },
+            tooltip: 'Increase Image Size',
+          ),
+          TextButton(
+            child: const Text("Save"),
+            onPressed: () async {
+              if (await collection.addMedia(newMedia)) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(const SnackBar(content: Text('Media added successfully.')));
+                Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to add media.')));
+              }
+            },
+          )
+        ],
+      ),
+      body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+          child: kIsWeb ? const MainDrawer() : null,
         ),
-        body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            child: kIsWeb ? const MainDrawer() : null,
+        Expanded(
+          child: FutureBuilder<List<Media>>(
+            future: _getMediaList(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return MediaGrid(snapshot.data!, _gridSize, newMedia);
+              } else if (snapshot.hasError) {
+                return const Text("Error");
+              }
+              return const Text("Loading...");
+            },
           ),
-          Expanded(
-            child: FutureBuilder<List<Media>>(
-              future: _getMediaList(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return MediaGrid(snapshot.data!, _gridSize, jwt);
-                } else if (snapshot.hasError) {
-                  return const Text("Error");
-                }
-                return const Text("Loading...");
-              },
-            ),
-          ),
-        ]),
-        drawer: kIsWeb ? null : const MainDrawer());
+        ),
+      ]),
+    );
   }
 }
 
 class MediaGrid extends StatelessWidget {
-  const MediaGrid(this.media, this.gridSize, this.jwt, {Key? key}) : super(key: key);
+  const MediaGrid(this.media, this.gridSize, this.newMedia, {Key? key}) : super(key: key);
 
   final List<Media> media;
   final int gridSize;
-  final String jwt;
+  final List<Media> newMedia;
 
-  Widget _createTappableMediaIcon(BuildContext context, Media media) {
+  Widget _createTappableMediaIcon(BuildContext context, Media media, List<Media> newMedia) {
     // Make a nice button that has the thumbnail inside it
     return GestureDetector(
-      onTap: () =>
-          {Navigator.pushNamed(context, '/media_viewer', arguments: media)},
-      child: MediaIcon(media, jwt),
-    );
+        onTap: () => {newMedia.add(media)},
+        child: Stack(
+          children: <Widget>[
+            MediaIcon(media),
+            if(newMedia.contains(media)) const Align(
+              alignment: Alignment.topRight,
+              child: Icon(Icons.add_circle_outline),
+            )
+          ],
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
-      // This is needed for the shared media page
-      // so that it doesn't scroll within the larger scrollable list
-      physics: const ClampingScrollPhysics(),
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: gridSize),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: gridSize),
       itemBuilder: (BuildContext context, int index) {
-        return _createTappableMediaIcon(context, media[index]);
+        return _createTappableMediaIcon(context, media[index], newMedia);
       },
       itemCount: media.length,
     );
@@ -189,10 +211,9 @@ class MediaGrid extends StatelessWidget {
 }
 
 class MediaIcon extends StatelessWidget {
-  const MediaIcon(final this.media, this.jwt, {Key? key}) : super(key: key);
+  const MediaIcon(final this.media, {Key? key}) : super(key: key);
 
   final Media media;
-  final String jwt;
 
   @override
   Widget build(BuildContext context) {
@@ -203,14 +224,9 @@ class MediaIcon extends StatelessWidget {
       ),
       child: Center(
         child: CachedNetworkImage(
-          httpHeaders: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
             imageUrl: media.thumbnailURL,
             progressIndicatorBuilder: (context, url, downloadProgress) =>
-                SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: CircularProgressIndicator(
-                        value: downloadProgress.progress)),
+                SizedBox(width: 32, height: 32, child: CircularProgressIndicator(value: downloadProgress.progress)),
             errorWidget: (context, url, error) => const Icon(Icons.error),
             imageBuilder: (context, imageProvider) {
               return Container(
@@ -226,4 +242,3 @@ class MediaIcon extends StatelessWidget {
     );
   }
 }
-

@@ -22,13 +22,16 @@ class Collections extends StatefulWidget {
 
 class _CollectionsState extends State<Collections> {
 
+  String jwt = "";
+
   // Store the URLs for all the photos the app needs to download and cache
   Future<List<Collection>> _getCollectionsList() async {
     List<Collection> collections = [];
 
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
-    String jwt = await User.getJWT();
+    jwt = await User.getJWT();
+    log(jwt);
     http.Response resp;
     try {
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections'),
@@ -47,14 +50,13 @@ class _CollectionsState extends State<Collections> {
 
     log(resp.body);
     final responseJson = jsonDecode(resp.body);
-    log(responseJson);
 
     // For each collection item we got
     for (int i = 0; i < responseJson.length; i++) {
       // Find all the photos
       // Send a request to the backend
       try {
-        resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + responseJson.collection_id),
+        resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + responseJson[i]["collection_id"].toString()),
             headers: {
               HttpHeaders.authorizationHeader: 'Bearer ' + jwt,
             });
@@ -70,24 +72,21 @@ class _CollectionsState extends State<Collections> {
 
       log(resp.body);
       final responseJson2 = jsonDecode(resp.body);
-      log(responseJson2);
-
       List<Media> m = [];
-      final cmedia = responseJson2.media;
-      for (int k = 0; k < cmedia.length; k++) {
-        m.add(Media(
-          cmedia[i].media_id, MediaType.photo,
-          serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/thumbnail',
-          serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/media',
-        ));
+
+      if(responseJson2.length > 0 && responseJson2.containsKey("media")) {
+        final cmedia = responseJson2["media"];
+        for (int k = 0; k < cmedia.length; k++) {
+          m.add(Media(
+            cmedia[i].media_id, MediaType.photo,
+            serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/thumbnail',
+            serverAddress + "/api/v1/media/" + cmedia[i].media_id + '/media',
+          ));
+        }
       }
 
       // Save the collection
-      collections.add(Collection(
-        responseJson[i].collection_id, "", responseJson[i].name,
-        false,
-        m,
-      ));
+      collections.add(Collection(responseJson[i]["name"], "", responseJson[i]["collection_id"].toString(), false, m));
     }
 
     // TODO: Save and load from disk if network is unavailable
@@ -120,7 +119,7 @@ class _CollectionsState extends State<Collections> {
               future: _getCollectionsList(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return CollectionList(snapshot.data!);
+                  return CollectionList(snapshot.data!, jwt);
                 } else if (snapshot.hasError) {
                   return const Text("Error");
                 }
@@ -134,9 +133,10 @@ class _CollectionsState extends State<Collections> {
 }
 
 class CollectionList extends StatelessWidget {
-  const CollectionList(this.collections, {Key? key}) : super(key: key);
+  const CollectionList(this.collections, this.jwt, {Key? key}) : super(key: key);
 
   final List<Collection> collections;
+  final String jwt;
 
   Widget _createCollectionCard(
       BuildContext context, Collection collection) {
@@ -145,7 +145,10 @@ class CollectionList extends StatelessWidget {
         Navigator.pushNamed(
           context,
           '/collection_viewer',
-          arguments: collection,
+          arguments: <String, dynamic>{
+            'collection': collection,
+            'jwt': jwt,
+          },
         )
       },
       child: Card(
@@ -155,8 +158,8 @@ class CollectionList extends StatelessWidget {
             GridView.count(
               shrinkWrap: true,
               crossAxisCount: 4,
-              children: List.generate(4, (index) {
-                return MediaIcon(collection.images[index]);
+              children: List.generate(math.min(4, collection.images.length), (index) {
+                return MediaIcon(collection.images[index], jwt);
               }),
             ),
             ListTile(

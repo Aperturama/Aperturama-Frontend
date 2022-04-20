@@ -31,6 +31,7 @@ class _AutoUploadState extends State<AutoUpload> {
   List<Media> recentlyUploaded = [];
   List<MediaFolder> localMediaFolders = [];
   DateTime lastSync = DateTime.parse("1970-01-01 00:00:00");
+  String jwt = "";
 
   // Load settings from disk on first load
   @override
@@ -41,6 +42,8 @@ class _AutoUploadState extends State<AutoUpload> {
 
   void _loadAutomaticUploadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+
+    jwt = await User.getJWT();
 
     String _recentlyUploadedString = prefs.getString("recentlyUploaded") ?? "";
     String _localMediaFoldersString = prefs.getString("localMediaFolders") ?? "";
@@ -186,8 +189,9 @@ class _AutoUploadState extends State<AutoUpload> {
         // TODO: Make a bunch of HTTP requests to the backend server
         // Send a request to the backend with the photo
 
-        final extension = p.extension(f.path, 1).substring(1);
-        if(["jpg", "jpeg", "png", "gif"].contains(extension)) {
+        String extension = p.extension(f.path, 1).substring(1);
+        if(extension == "jpg") extension = "jpeg";
+        if(["jpeg", "png", "gif"].contains(extension)) {
           log("Found image to check");
           // This is an image, let's hash it and see if the server has it
           final hash = await getFileSha256(f.path);
@@ -212,7 +216,8 @@ class _AutoUploadState extends State<AutoUpload> {
             request.headers['authorization'] = 'Bearer ' + jwt;
             request.files.add(http.MultipartFile.fromBytes('mediafile',
                 await File.fromUri(f.uri).readAsBytes(),
-                contentType: httpParser.MediaType('image', extension)));
+                contentType: httpParser.MediaType('image', extension),
+            filename: p.basename(f.path)));
 
             await request.send().then((response) {
               if (response.statusCode == 200) {
@@ -334,7 +339,7 @@ class _AutoUploadState extends State<AutoUpload> {
                         leading: SizedBox(
                             width: 56,
                             height: 56,
-                            child: MediaIcon(recentlyUploaded[index])),
+                            child: MediaIcon(recentlyUploaded[index], jwt)),
                         title: Text(recentlyUploaded[index].localPath),
                         subtitle: Text("Uploaded: " +
                             recentlyUploaded[index].uploadedTimestamp.year.toString() + "/" +

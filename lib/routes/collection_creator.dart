@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:aperturama/utils/media.dart';
 import 'package:flutter/services.dart';
+import 'package:aperturama/utils/user.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+import 'dart:developer';
+
+import '../utils/user.dart';
 
 class CollectionCreator extends StatefulWidget {
   const CollectionCreator({Key? key}) : super(key: key);
@@ -20,8 +27,29 @@ class _CollectionCreatorState extends State<CollectionCreator> {
     super.initState();
   }
 
-  Future<bool> createCollection(String name) {
-    return false;
+  Future<bool> createCollection(String name) async {
+    // Send a request to the backend
+    String serverAddress = await User.getServerAddress();
+    String jwt = await User.getJWT();
+    http.Response resp;
+    try {
+      resp = await http.post(Uri.parse(serverAddress + '/api/v1/collections'),
+        headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
+        body: { "name": name }
+      );
+
+      if(resp.statusCode != 200) {
+        log("createCollection Non 200 status code: " + resp.statusCode.toString());
+        return false;
+      } else {
+        return true;
+      }
+
+    } on SocketException {
+      log("createCollection socket exception");
+      return false;
+    }
+
   }
 
   @override
@@ -56,12 +84,11 @@ class _CollectionCreatorState extends State<CollectionCreator> {
                           child: const Text('Create Collection'),
                           onPressed: () async {
                             if (await createCollection(collectionNameController.text)) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Collection created')));
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Collection created')));
                               Navigator.pop(context);
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text('Failed to create collection')));
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(content: Text('Failed to create collection')));
                             }
                           },
                         ),
