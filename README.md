@@ -25,6 +25,7 @@ flutter build web --release
 - Editing what media is in a collection could bring you back to the settings rather than the homepage
 - Hide photos that are already in a collection from the add to collection view
 - Web version should hide/autofill server URL
+- Plurality fixes (collections vs collection)
 
 # References Used:
 https://docs.flutter.dev/

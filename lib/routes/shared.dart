@@ -74,7 +74,6 @@ class _SharedState extends State<Shared> {
 
         final responseJson = jsonDecode(resp.body);
 
-        log("Listing collection media");
         // For each collection item we got
         for (int i = 0; i < responseJson.length; i++) {
           // Find all the photos
@@ -120,7 +119,6 @@ class _SharedState extends State<Shared> {
     // TODO: Save and load from disk if network is unavailable
 
     return MediaCollectionsLists(collections, media);
-
   }
 
   // Function to handle changing the size of the photo grid
