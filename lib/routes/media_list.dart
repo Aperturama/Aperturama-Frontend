@@ -3,14 +3,11 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:aperturama/utils/main_drawer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aperturama/utils/media.dart';
-
-import '../utils/main_drawer.dart';
 import '../utils/user.dart';
 
 class MediaList extends StatefulWidget {
@@ -37,7 +34,6 @@ class _MediaListState extends State<MediaList> {
     jwt = await User.getJWT();
     http.Response resp;
     try {
-      log("JWT: " + jwt);
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/media'),
         headers: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt });
 
@@ -46,12 +42,10 @@ class _MediaListState extends State<MediaList> {
         return media;
       }
 
-      log(resp.body);
       final responseJson = jsonDecode(resp.body);
 
       // For each media item we got
       for (int i = 0; i < responseJson.length; i++) {
-        log("image " + i.toString());
         media.add(Media(
           responseJson[i]["media_id"].toString(), MediaType.photo,
           serverAddress + "/api/v1/media/" + responseJson[i]["media_id"].toString() + '/thumbnail',
@@ -60,7 +54,6 @@ class _MediaListState extends State<MediaList> {
         media[i].filename = responseJson[i]["filename"];
         media[i].takenTimestamp = (responseJson[i]["date_taken"] != null) ? DateTime.parse(responseJson[i]["date_taken"]) : DateTime.now();
       }
-      log("images made");
 
     } on SocketException {
       log("Media listing failed: Socket exception");
@@ -215,26 +208,22 @@ class MediaIcon extends StatelessWidget {
       child: Center(
         child: CachedNetworkImage(
           httpHeaders: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
-            imageUrl: media.thumbnailURL + "?code=" + code,
-            progressIndicatorBuilder: (context, url, downloadProgress) =>
-                SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: CircularProgressIndicator(
-                        value: downloadProgress.progress)),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
-            imageBuilder: (context, imageProvider) {
-              return Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: imageProvider,
-                    fit: BoxFit.fitWidth,
-                  ),
+          imageUrl: media.thumbnailURL + "?code=" + code,
+          progressIndicatorBuilder: (context, url, downloadProgress) =>
+              SizedBox(width: 32, height: 32, child: CircularProgressIndicator(value: downloadProgress.progress)),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
+          imageBuilder: (context, imageProvider) {
+            return Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.fitWidth,
                 ),
-              );
-            }),
+              ),
+            );
+          }
+        ),
       ),
     );
   }
 }
-

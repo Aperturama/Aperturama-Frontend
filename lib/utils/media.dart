@@ -71,7 +71,6 @@ class Media {
 
       } else {
         final data = jsonDecode(resp.body);
-        log(data.toString());
 
         // Success, save info
         sharingLink = serverAddress + "/#/s?media=" + id + "&code=" + data["code"];
@@ -231,7 +230,6 @@ class Collection {
         shared = s;
         if(s) {
           final data = jsonDecode(resp.body);
-          log(data.toString());
           sharingCode = data["code"];
           sharingLink = serverAddress + "/#/s?collection=" + id + "&code=" + sharingCode;
         } else {
@@ -263,7 +261,6 @@ class Collection {
       } else {
         // Success, save info
         final data = jsonDecode(resp.body);
-        log(data.toString());
         sharingCode = data["code"];
         sharingLink = serverAddress + "/#/s?collection=" + id + "&code=" + sharingCode;
         return true;

@@ -2,11 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
-
 import 'package:aperturama/utils/user.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 
 class MainDrawer extends StatefulWidget {
   const MainDrawer({Key? key}) : super(key: key);
@@ -34,6 +32,7 @@ class _MainDrawerState extends State<MainDrawer> {
         '' + suffixes[i];
   }
 
+  // Queries the backend for stats about the user and their data storage
   void _populateStats() async {
     String jwt = await User.getJWT();
     String serverAddress = await User.getServerAddress();
@@ -45,9 +44,7 @@ class _MainDrawerState extends State<MainDrawer> {
           headers: {"Authorization": "Bearer " + jwt});
       if(resp.statusCode == 200) {
         // Success, do a login now
-        log("Main Drawer success");
         Map<String, dynamic> data = jsonDecode(resp.body);
-        log(data.toString());
 
         numPhotos = data["n_media"] ?? 0;
         numCollections = data["n_collections"] ?? 0;
@@ -73,7 +70,7 @@ class _MainDrawerState extends State<MainDrawer> {
     _populateStats();
   }
 
-
+  // Small wrapper widget to make some nice padding between stats
   Widget stat(String t) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
@@ -86,6 +83,7 @@ class _MainDrawerState extends State<MainDrawer> {
     );
   }
 
+  // Small widget to insert some padding between the divider and the bottom of the screen
   Widget statPad() {
     return const Padding(
         padding: EdgeInsets.symmetric(vertical: 6, horizontal: 0)
@@ -97,71 +95,72 @@ class _MainDrawerState extends State<MainDrawer> {
     return SizedBox(
       width: 215,
       child: Drawer(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Flexible( // Menu options at the top of the screen
-                child: ListView(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.image),
-                      title: const Text('Photos and Videos'),
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, '/media');
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.collections),
-                      title: const Text('Collections'),
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, '/collections');
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.folder_shared),
-                      title: const Text('Shared with me'),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, '/shared');
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.autorenew),
-                      title: const Text('Auto upload'),
-                      onTap: () {
-                        Navigator.pushNamed(context, '/auto_upload');
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.settings),
-                      title: const Text('Settings'),
-                      onTap: () {
-                        Navigator.pushNamed(context, '/settings');
-                      },
-                    ),
-                  ],
-                ),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            // Menu options at the top of the screen
+            Flexible(
+              child: ListView(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.image),
+                    title: const Text('Photos and Videos'),
+                    onTap: () {
+                      Navigator.pushReplacementNamed(context, '/media');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.collections),
+                    title: const Text('Collections'),
+                    onTap: () {
+                      Navigator.pushReplacementNamed(context, '/collections');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.folder_shared),
+                    title: const Text('Shared with me'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/shared');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.autorenew),
+                    title: const Text('Auto upload'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/auto_upload');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Settings'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/settings');
+                    },
+                  ),
+                ],
               ),
-              const Divider(height: 1.0),
-              if (initialDataPending)
-                const CircularProgressIndicator()
-              else
-                ListView( // Stats at the bottom of the screen
-                  padding: EdgeInsets.zero,
-                  shrinkWrap: true,
-                  children: [
-                    statPad(),
-                    stat('Logged in as ' + firstName),
-                    stat(numPhotos.toString() + ' Photos'),
-                    stat(numCollections.toString() + ' Collections'),
-                    stat(numSharedItems.toString() + ' Shared Items'),
-                    stat(formatBytes(storageUsed, 0) + " Used / " +
-                         formatBytes(storageTotal, 0) + " Total"),
-                    statPad(),
-                  ],
-                ),
-            ],
-          )),
+            ),
+            // Stats at the bottom of the screen
+            const Divider(height: 1.0),
+            if (initialDataPending)
+              const CircularProgressIndicator()
+            else
+              ListView(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                children: [
+                  statPad(),
+                  stat('Logged in as ' + firstName),
+                  stat(numPhotos.toString() + ' Photos'),
+                  stat(numCollections.toString() + ' Collections'),
+                  stat(numSharedItems.toString() + ' Shared Items'),
+                  stat(formatBytes(storageUsed, 0) + " Used / " + formatBytes(storageTotal, 0) + " Total"),
+                  statPad(),
+                ],
+              ),
+          ],
+        )),
     );
   }
 }

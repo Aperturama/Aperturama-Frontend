@@ -3,15 +3,12 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'dart:developer';
-
 import 'package:aperturama/routes/collections_list.dart';
 import 'package:aperturama/routes/media_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:aperturama/utils/main_drawer.dart';
 import 'package:aperturama/utils/media.dart';
-
-import '../utils/main_drawer.dart';
 import '../utils/user.dart';
 
 class Shared extends StatefulWidget {
@@ -46,7 +43,6 @@ class _SharedState extends State<Shared> {
       if(resp.statusCode != 200) {
         log("Media listing failed: Code " + resp.statusCode.toString());
       } else {
-        log(resp.body);
         final responseJson = jsonDecode(resp.body);
 
         // For each media item we got
@@ -63,8 +59,6 @@ class _SharedState extends State<Shared> {
       log("Media listing failed: Socket exception");
     }
 
-    log("Shared media listed");
-
     List<Collection> collections = [];
 
     // Send a request to the backend
@@ -78,7 +72,6 @@ class _SharedState extends State<Shared> {
         log("Collection listing failed: Code " + resp.statusCode.toString());
       } else {
 
-        log(resp.body);
         final responseJson = jsonDecode(resp.body);
 
         log("Listing collection media");
@@ -96,11 +89,9 @@ class _SharedState extends State<Shared> {
             if(resp.statusCode != 200) {
               log("Collection media listing failed: Code " + resp.statusCode.toString());
             } else {
-              log(resp.body);
               final responseJson2 = jsonDecode(resp.body);
 
               final cmedia = responseJson2["media"];
-              log("here");
               for (int k = 0; k < cmedia.length; k++) {
                 m.add(Media(
                   cmedia[i]["media_id"].toString(), MediaType.photo,
@@ -108,7 +99,6 @@ class _SharedState extends State<Shared> {
                   serverAddress + "/api/v1/media/" + cmedia[i]["media_id"].toString() + '/media',
                 ));
               }
-              log("here2");
               // Save the collection
               collections.add(Collection(
                 responseJson[i]["name"], "", responseJson[i]["collection_id"].toString(),
@@ -136,11 +126,11 @@ class _SharedState extends State<Shared> {
   // Function to handle changing the size of the photo grid
   void _changeGridSize(int amount) {
     // Make sure the grid size can't go below 1 or above the max size
-
     if (_gridSize > 10) {
       amount *= kIsWeb ? 2 : 1;
     }
 
+    // Otherwise update it as normal
     if (amount < 0) {
       if (_gridSize + amount <= 0) {
         _gridSize = 1;
@@ -161,6 +151,7 @@ class _SharedState extends State<Shared> {
 
   @override
   Widget build(BuildContext context) {
+
     // Set up the initial grid sizing
     // TODO: This doesn't reload when a web browser's size is changed, should probably be fixed
     if (_gridSize == 0 && _gridSizeMax == 0) {
@@ -171,63 +162,61 @@ class _SharedState extends State<Shared> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: const Text("Shared Media"),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.remove_circle_outline),
-              onPressed: () {
-                _changeGridSize(1);
-              },
-              tooltip: 'Decrease Image Size',
-            ),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {
-                _changeGridSize(-1);
-              },
-              tooltip: 'Increase Image Size',
-            ),
-          ],
-        ),
-        body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            child: kIsWeb ? const MainDrawer() : null,
-          ),
-          FutureBuilder<MediaCollectionsLists>(
-            future: _getSharedList(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Expanded(
-                  child: ListView(
-                    children: [
-                      ListTile(
-                        horizontalTitleGap: 0,
-                        title: const Text("Collections"),
-                        contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
-                        subtitle: Text(snapshot.data!.collections.length.toString() + " collections shared with you"),
-                      ),
-                      CollectionList(snapshot.data!.collections, jwt),
-                      ListTile(
-                        horizontalTitleGap: 0,
-                        title: const Text("Photos"),
-                        contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
-                        subtitle: Text(snapshot.data!.media.length.toString() + " photos shared with you"),
-                      ),
-                     MediaGrid(snapshot.data!.media, _gridSize, jwt, ""),
-                    ],
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return const Text("Error");
-              }
-              return const Text("Loading...");
+      appBar: AppBar(
+        title: const Text("Shared Media"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.remove_circle_outline),
+            onPressed: () {
+              _changeGridSize(1);
             },
+            tooltip: 'Decrease Image Size',
           ),
-        ]),
-        drawer: kIsWeb ? null : const MainDrawer());
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline),
+            onPressed: () {
+              _changeGridSize(-1);
+            },
+            tooltip: 'Increase Image Size',
+          ),
+        ],
+      ),
+      body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+          child: kIsWeb ? const MainDrawer() : null,
+        ),
+        FutureBuilder<MediaCollectionsLists>(
+          future: _getSharedList(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Expanded(
+                child: ListView(
+                  children: [
+                    ListTile(
+                      horizontalTitleGap: 0,
+                      title: const Text("Collections"),
+                      contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
+                      subtitle: Text(snapshot.data!.collections.length.toString() + " collections shared with you"),
+                    ),
+                    CollectionList(snapshot.data!.collections, jwt),
+                    ListTile(
+                      horizontalTitleGap: 0,
+                      title: const Text("Photos"),
+                      contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
+                      subtitle: Text(snapshot.data!.media.length.toString() + " photos shared with you"),
+                    ),
+                   MediaGrid(snapshot.data!.media, _gridSize, jwt, ""),
+                  ],
+                ),
+              );
+            } else if (snapshot.hasError) {
+              return const Text("Error");
+            }
+            return const Text("Loading...");
+          },
+        ),
+      ]),
+      drawer: kIsWeb ? null : const MainDrawer());
   }
 }

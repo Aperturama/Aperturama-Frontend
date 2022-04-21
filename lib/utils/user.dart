@@ -11,56 +11,37 @@ class User {
   User();
 
   static Future<bool> isLoggedIn() async {
-    // Create storage
     final prefs = await SharedPreferences.getInstance();
-
-    // Read value
     return prefs.getBool("isLoggedIn") ?? false;
   }
 
   static Future<String> getJWT() async {
-    // Create storages
     const storage = FlutterSecureStorage();
-
-    // Read value
     return await storage.read(key: "jwt") ?? "";
   }
 
   static Future<String> getServerAddress() async {
-    // Create storage
     final prefs = await SharedPreferences.getInstance();
-
-    // Read value
     return prefs.getString("serverAddress") ?? "";
   }
 
   static Future<String> getEmail() async {
-    // Create storage
     final prefs = await SharedPreferences.getInstance();
-
-    // Read value
     return prefs.getString("email") ?? "";
   }
 
   static Future<String> getFirstName() async {
-    // Create storage
     final prefs = await SharedPreferences.getInstance();
-
-    // Read value
     return prefs.getString("firstName") ?? "";
   }
 
   static Future<String> getLastName() async {
-    // Create storage
     final prefs = await SharedPreferences.getInstance();
-
-    // Read value
     return prefs.getString("lastName") ?? "";
   }
 
   static Future<bool> tryRegister(String serverAddress, String email, String password) async {
-    // Create storages
-    const storage = FlutterSecureStorage();
+    // Create storage
     final prefs = await SharedPreferences.getInstance();
 
     // Store the data for the user
@@ -69,7 +50,6 @@ class User {
 
     // Send a request to the backend with the registration info
     Map<String, String> registrationInfo = {"email": email, "password": password, "first_name": "", "last_name": ""};
-    log(registrationInfo.toString());
     http.Response resp;
     try {
       resp = await http.post(Uri.parse(serverAddress + '/api/v1/user'),
@@ -82,7 +62,6 @@ class User {
 
     if(resp.statusCode == 200) {
       // Success, do a login now
-      log("Registration success");
       return await tryLogIn(serverAddress, email, password);
     } else {
       log("Non 200 registration status code: " + resp.statusCode.toString());
@@ -118,9 +97,7 @@ class User {
     }
 
     // Success, get JWT
-    log("Login Success");
     String jwt = resp.body;
-    log("JWT: " + jwt);
 
     if(jwt != "") {
       // Write values
@@ -188,7 +165,6 @@ class User {
 
       } else {
         final data = jsonDecode(resp.body);
-        log(data.toString());
 
         // Success, save info
         await prefs.setString("email", data["email"]);

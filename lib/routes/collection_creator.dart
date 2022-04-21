@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:aperturama/utils/media.dart';
-import 'package:flutter/services.dart';
 import 'package:aperturama/utils/user.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
-
 import '../utils/user.dart';
 
 class CollectionCreator extends StatefulWidget {
@@ -27,6 +23,7 @@ class _CollectionCreatorState extends State<CollectionCreator> {
     super.initState();
   }
 
+  // Called to actually create the collection on the backend
   Future<bool> createCollection(String name) async {
     // Send a request to the backend
     String serverAddress = await User.getServerAddress();
@@ -56,7 +53,8 @@ class _CollectionCreatorState extends State<CollectionCreator> {
   Widget build(BuildContext context) {
     return AlertDialog(
       content: SizedBox(
-        height: MediaQuery.of(context).size.height / 1.2,
+        // Todo: Make this page a bit more attractive looking
+        height: MediaQuery.of(context).size.height / 4,
         width: MediaQuery.of(context).size.width / 1.1,
         child: Form(
           key: _formKey,

@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:io';
-
 import 'package:aperturama/routes/media_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aperturama/utils/media.dart';
 import 'package:http/http.dart' as http;
 import 'dart:developer';
@@ -66,7 +64,6 @@ class _CollectionsState extends State<Collections> {
 
         final responseJson2 = jsonDecode(resp.body);
         List<Media> m = [];
-
         final cmedia = responseJson2["media"];
         for (int k = 0; k < cmedia.length; k++) {
           m.add(Media(
@@ -75,7 +72,6 @@ class _CollectionsState extends State<Collections> {
             serverAddress + "/api/v1/media/" + cmedia[k]["media_id"].toString() + '/media',
           ));
         }
-
 
         // Save the collection
         collections.add(Collection(responseJson[i]["name"], "", responseJson[i]["collection_id"].toString(), false, m));
@@ -94,39 +90,39 @@ class _CollectionsState extends State<Collections> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Collections"),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {
-                Navigator.pushNamed(context, '/collections/new');
-              },
-              tooltip: 'Add new collection',
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text("Collections"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline),
+            onPressed: () {
+              Navigator.pushNamed(context, '/collections/new');
+            },
+            tooltip: 'Add new collection',
+          ),
+        ],
+      ),
+      body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+          child: kIsWeb ? const MainDrawer() : null, // Show sidebar if in web mode
         ),
-        body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            child: kIsWeb ? const MainDrawer() : null,
+        Expanded(
+          child: FutureBuilder<List<Collection>>(
+            future: _getCollectionsList(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return snapshot.data!.isNotEmpty ? CollectionList(snapshot.data!, jwt)
+                    : const Center(child: Text("No collections found."));
+              } else if (snapshot.hasError) {
+                return const Center(child: Text("Error"));
+              }
+              return const Center(child: Text("Loading..."));
+            },
           ),
-          Expanded(
-            child: FutureBuilder<List<Collection>>(
-              future: _getCollectionsList(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return snapshot.data!.isNotEmpty ? CollectionList(snapshot.data!, jwt)
-                      : const Center(child: Text("No collections found."));
-                } else if (snapshot.hasError) {
-                  return const Center(child: Text("Error"));
-                }
-                return const Center(child: Text("Loading..."));
-              },
-            ),
-          ),
-        ]),
-        drawer: kIsWeb ? null : const MainDrawer());
+        ),
+      ]),
+      drawer: kIsWeb ? null : const MainDrawer()); // Show drawer if in app mode
   }
 }
 

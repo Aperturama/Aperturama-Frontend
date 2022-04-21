@@ -1,6 +1,4 @@
 import 'dart:math';
-
-import 'package:aperturama/routes/collection_settings.dart';
 import 'package:aperturama/routes/media_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -68,55 +66,55 @@ class _CollectionViewerState extends State<CollectionViewer> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text(collection.name),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.remove_circle_outline),
-              onPressed: () {
-                _changeGridSize(1);
-              },
-              tooltip: 'Decrease Image Size',
-            ),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {
-                _changeGridSize(-1);
-              },
-              tooltip: 'Increase Image Size',
-            ),
-          ],
-        ),
-        body: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              horizontalTitleGap: 0,
-              title: ListTile(
-                title: Transform(
-                  transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
-                  child: Text(collection.shared ? "Shared" : "Not Shared"),
-                ),
-                trailing: (code != "") ? null : TextButton( // Hide settings if the code is used
-                  child: const Text('Settings'),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/collection_settings',
-                      arguments: <String, dynamic>{
-                        'collection': collection,
-                        'jwt': jwt,
-                      },
-                    );
-                  },
-                ),
+      appBar: AppBar(
+        title: Text(collection.name),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.remove_circle_outline),
+            onPressed: () {
+              _changeGridSize(1);
+            },
+            tooltip: 'Decrease Image Size',
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline),
+            onPressed: () {
+              _changeGridSize(-1);
+            },
+            tooltip: 'Increase Image Size',
+          ),
+        ],
+      ),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            horizontalTitleGap: 0,
+            title: ListTile(
+              title: Transform(
+                transform: Matrix4.translationValues(-16, 0.0, 0.0), // Fix the indention issue
+                child: Text(collection.shared ? "Shared" : "Not Shared"),
               ),
-              subtitle: Text(collection.information),
-              contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
+              trailing: (code != "") ? null : TextButton( // Hide settings if the code is used
+                child: const Text('Settings'),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/collection_settings',
+                    arguments: <String, dynamic>{
+                      'collection': collection,
+                      'jwt': jwt,
+                    },
+                  );
+                },
+              ),
             ),
-            Expanded(
-              child: MediaGrid(collection.media, _gridSize, jwt, code),
-            ),
-          ],
-        ));
+            subtitle: Text(collection.information),
+            contentPadding: const EdgeInsets.only(left: 14, bottom: 10),
+          ),
+          Expanded(
+            child: MediaGrid(collection.media, _gridSize, jwt, code),
+          ),
+        ],
+      ));
   }
 }

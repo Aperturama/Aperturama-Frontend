@@ -5,7 +5,6 @@ import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
-
 import '../utils/user.dart';
 
 class CollectionSettings extends StatefulWidget {
@@ -41,7 +40,6 @@ class _CollectionSettingsState extends State<CollectionSettings> {
     jwt = await User.getJWT();
     http.Response resp;
     try {
-      log("JWT: " + jwt);
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/collections/' + collection.id),
           headers: {HttpHeaders.authorizationHeader: 'Bearer ' + jwt});
 
@@ -50,7 +48,7 @@ class _CollectionSettingsState extends State<CollectionSettings> {
         return;
       }
 
-      log(resp.body);
+      // Parse and store the info as appropriate
       final responseJson = jsonDecode(resp.body);
       collection.shared = responseJson["shared"] == "true" ? true : false;
       if (collection.shared) {

@@ -1,17 +1,10 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
-import 'package:http/http.dart' as http;
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:aperturama/utils/main_drawer.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aperturama/utils/media.dart';
-
 import '../utils/main_drawer.dart';
-import '../utils/user.dart';
+import 'media_list.dart';
 
 class CollectionMediaManagerRemove extends StatefulWidget {
   const CollectionMediaManagerRemove({Key? key}) : super(key: key);
@@ -65,35 +58,33 @@ class _CollectionMediaManagerRemoveState extends State<CollectionMediaManagerRem
     });
   }
 
+  // Function to build a nice button widget with the thumbnail inside it that can be tapped to add to the change list
   Widget _createTappableMediaIcon(Media media) {
-    // Make a nice button that has the thumbnail inside it
     return GestureDetector(
-        onTap: () {
-          log("adding media");
-          if (selectedMedia.contains(media)) {
-            selectedMedia.remove(media);
-          } else {
-            selectedMedia.add(media);
-          }
-          log(selectedMedia.toString());
-          setState(() {});
-        },
-        child: Stack(
-          children: <Widget>[
-            MediaIcon(media, jwt),
-            if (selectedMedia.contains(media))
-              const Align(
-                alignment: Alignment.topRight,
-                child: Icon(Icons.remove_circle_outline),
-              ),
-          ],
-        ));
+      onTap: () {
+        if (selectedMedia.contains(media)) {
+          selectedMedia.remove(media);
+        } else {
+          selectedMedia.add(media);
+        }
+        setState(() {});
+      },
+      child: Stack(
+        children: <Widget>[
+          MediaIcon(media, jwt, ""),
+          if (selectedMedia.contains(media))
+            const Align(
+              alignment: Alignment.topRight,
+              child: Icon(Icons.remove_circle_outline),
+            ),
+        ],
+      )
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (jwt == "") {
-      // Only run this once
+    if (jwt == "") { // Only run this once
       if (ModalRoute.of(context)!.settings.arguments != null) {
         var args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
         collection = args["collection"];
@@ -166,41 +157,6 @@ class _CollectionMediaManagerRemoveState extends State<CollectionMediaManagerRem
           )
         )
       ]),
-    );
-  }
-}
-
-class MediaIcon extends StatelessWidget {
-  const MediaIcon(final this.media, this.jwt, {Key? key}) : super(key: key);
-
-  final Media media;
-  final String jwt;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5.0),
-      ),
-      child: Center(
-        child: CachedNetworkImage(
-            httpHeaders: {HttpHeaders.authorizationHeader: 'Bearer ' + jwt},
-            imageUrl: media.thumbnailURL,
-            progressIndicatorBuilder: (context, url, downloadProgress) =>
-                SizedBox(width: 32, height: 32, child: CircularProgressIndicator(value: downloadProgress.progress)),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
-            imageBuilder: (context, imageProvider) {
-              return Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: imageProvider,
-                    fit: BoxFit.fitWidth,
-                  ),
-                ),
-              );
-            }),
-      ),
     );
   }
 }

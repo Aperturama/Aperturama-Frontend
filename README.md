@@ -1,5 +1,6 @@
 # Aperturama-Frontend
 
+An app that helps you back up and sync your media to a server under your control. 
 
 # Build info
 Run these commands:
@@ -22,7 +23,7 @@ flutter build web --release
 - A splash screen (https://docs.flutter.dev/development/ui/advanced/splash-screen)
 - Proper looking name/app icon on Android (well, one that works reliably)
 - Editing what media is in a collection could bring you back to the settings rather than the homepage
-- Hide photos that are already in a collection from the add view
+- Hide photos that are already in a collection from the add to collection view
 - Web version should hide/autofill server URL
 
 # References Used:

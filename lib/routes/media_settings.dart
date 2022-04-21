@@ -40,7 +40,6 @@ class _MediaSettingsState extends State<MediaSettings> {
     jwt = await User.getJWT();
     http.Response resp;
     try {
-      log("JWT: " + jwt);
       resp = await http.get(Uri.parse(serverAddress + '/api/v1/media/' + media.id),
           headers: {HttpHeaders.authorizationHeader: 'Bearer ' + jwt});
 
@@ -49,7 +48,7 @@ class _MediaSettingsState extends State<MediaSettings> {
         return;
       }
 
-      log(resp.body);
+      // Parse and store the info as appropriate
       final responseJson = jsonDecode(resp.body);
       media.shared = responseJson["shared"] == "true" ? true : false;
       if (media.shared) {

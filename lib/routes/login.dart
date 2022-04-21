@@ -1,8 +1,4 @@
-import 'dart:developer';
-
-import 'package:aperturama/utils/main_drawer.dart';
 import 'package:aperturama/utils/user.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppLogin extends StatefulWidget {
@@ -24,9 +20,12 @@ class _AppLoginState extends State<AppLogin> {
     serverAddress = await User.getServerAddress();
     email = await User.getEmail();
     jwt = await User.getJWT();
+
+    // Redirect to media page if they're logged in already
     if(jwt != "") {
       Navigator.pushReplacementNamed(context, '/media');
     }
+
     initialDataPending = false;
     setState(() {});
   }
@@ -210,7 +209,10 @@ class _AppLoginState extends State<AppLogin> {
                             maxWidth: MediaQuery.of(context).size.width / 2,
                           ),
                           child: const Image(
-                              image: AssetImage('assets/logo.png')))),
+                              image: AssetImage('assets/logo.png')
+                          ),
+                      ),
+                  ),
                   const SizedBox(height: 10),
                   const Center(
                     child: Text("Welcome to Aperturama",
