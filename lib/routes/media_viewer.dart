@@ -66,7 +66,7 @@ class _MediaViewerState extends State<MediaViewer> {
           maxScale: _maxScale,
           child: CachedNetworkImage(
             httpHeaders: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
-            imageUrl: media.highresURL + "?code=" + code,
+            imageUrl: media.highresURL + (code.isEmpty ? "" : "?code=" + code),
             // Make the image fit the width
             imageBuilder: (context, imageProvider) {
               WidgetsBinding.instance?.addPostFrameCallback((_) => setState(() {
@@ -88,7 +88,7 @@ class _MediaViewerState extends State<MediaViewer> {
                 // Low-res thumbnail
                 CachedNetworkImage(
                   httpHeaders: { HttpHeaders.authorizationHeader: 'Bearer ' + jwt },
-                  imageUrl: media.thumbnailURL + "?code=" + code,
+                  imageUrl: media.thumbnailURL + (code.isEmpty ? "" : "?code=" + code),
                   progressIndicatorBuilder: (context, url, downloadProgress) =>
                       CircularProgressIndicator(
                           value: downloadProgress.progress),

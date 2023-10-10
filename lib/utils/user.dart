@@ -40,9 +40,23 @@ class User {
     return prefs.getString("lastName") ?? "";
   }
 
+  static String parseServerAddress(String serverAddress) {
+    // Modify serverAddress if necessary
+    if(!(serverAddress.contains("http://") || serverAddress.contains("https://"))) {
+      serverAddress = "https://" + serverAddress;
+    }
+    if(serverAddress[serverAddress.length - 1] == "/") {
+      serverAddress = serverAddress.substring(0, serverAddress.length - 1);
+    }
+    return serverAddress;
+  }
+
   static Future<bool> tryRegister(String serverAddress, String email, String password) async {
     // Create storage
     final prefs = await SharedPreferences.getInstance();
+
+    // Parse the server address to ensure the format is usable
+    serverAddress = parseServerAddress(serverAddress);
 
     // Store the data for the user
     await prefs.setString("serverAddress", serverAddress);
@@ -74,6 +88,9 @@ class User {
     // Create storages
     const storage = FlutterSecureStorage();
     final prefs = await SharedPreferences.getInstance();
+
+    // Parse the server address to ensure the format is usable
+    serverAddress = parseServerAddress(serverAddress);
 
     // Store the data for the user
     await prefs.setString("serverAddress", serverAddress);
