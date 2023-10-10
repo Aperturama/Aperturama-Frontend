@@ -2,14 +2,14 @@
 
 An app that helps you back up and sync your media to a server under your control. Written in Flutter and depends on the [backend server](https://github.com/Aperturama/Aperturama-Backend) for most functionality. 
 
-# Example Screenshots
+## Example Screenshots
 <p>
 <img src="repo_resources/Screenshot_Media.png" width="32%" title="Media" alt="Media">
 <img src="repo_resources/Screenshot_Collections.png" width="32%" title="Collections" alt="Collections">
 <img src="repo_resources/Screenshot_AutoUpload.png" width="32%" title="AutoUpload" alt="AutoUpload">
 </p>
 
-# Build Information
+## Build Information
 Run these commands:
 ```
 flutter pub get
@@ -20,7 +20,7 @@ flutter build apk --release
 flutter build web --release
 ```
 
-# Potential Future Improvements
+## Potential Future Improvements
 - Collection cards as a grid (not implemented due to issues with height being equal to width and being unable to fix that)
 - Global grid size (or one that gets saved/loaded to local storage and remembered across sessions)
 - Photo and collection IDs in the URL for reloaded pages to work properly
@@ -34,7 +34,7 @@ flutter build web --release
 - Web version should hide/autofill server URL
 - Plurality fixes (collections vs collection)
 
-# References Used:
+## References Used:
 - https://docs.flutter.dev/
 - https://api.flutter.dev/
 - https://stackoverflow.com/
