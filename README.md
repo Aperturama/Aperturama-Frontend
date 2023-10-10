@@ -1,8 +1,18 @@
 # Aperturama-Frontend
 
-An app that helps you back up and sync your media to a server under your control. 
+An app that helps you back up and sync your media to a server under your control. Written in Flutter and depends on the [backend server](https://github.com/Aperturama/Aperturama-Backend) for most functionality. 
 
-# Build info
+# Example Screenshots
+<style>
+table th {
+    width: 33%;
+}
+</style>
+| Media View                                    | Collections View                                          | Auto Upload Settings                                    |
+|-----------------------------------------------|-----------------------------------------------------------|---------------------------------------------------------|
+| ![Media](repo_resources/Screenshot_Media.png) | ![Collections](repo_resources/Screenshot_Collections.png) | ![AutoUpload](repo_resources/Screenshot_AutoUpload.png) |
+  
+# Build Information
 Run these commands:
 ```
 flutter pub get
@@ -12,7 +22,6 @@ flutter clean
 flutter build apk --release
 flutter build web --release
 ```
-
 
 # Potential Future Improvements
 - Collection cards as a grid (not implemented due to issues with height being equal to width and being unable to fix that)
