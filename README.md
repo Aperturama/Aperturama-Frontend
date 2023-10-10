@@ -7,7 +7,8 @@ Run these commands:
 ```
 flutter pub get
 flutter pub run flutter_launcher_icons:main
-flutter pub pub run flutter_launcher_icons:mainflutter clean
+flutter pub pub run flutter_launcher_icons:main
+flutter clean
 flutter build apk --release
 flutter build web --release
 ```
