@@ -3,10 +3,11 @@
 An app that helps you back up and sync your media to a server under your control. Written in Flutter and depends on the [backend server](https://github.com/Aperturama/Aperturama-Backend) for most functionality. 
 
 # Example Screenshots
-
+<p>
 <img src="repo_resources/Screenshot_Media.png" width="33%" title="Media" alt="Media">
 <img src="repo_resources/Screenshot_Collections.png" width="33%" title="Collections" alt="Collections">
 <img src="repo_resources/Screenshot_AutoUpload.png" width="33%" title="AutoUpload" alt="AutoUpload">
+</p>
 
 # Build Information
 Run these commands:
