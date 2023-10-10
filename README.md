@@ -29,7 +29,7 @@ flutter build web --release
 - Plurality fixes (collections vs collection)
 
 # References Used:
-https://docs.flutter.dev/
-https://api.flutter.dev/
-https://stackoverflow.com/
-https://medium.flutterdevs.com/
+- https://docs.flutter.dev/
+- https://api.flutter.dev/
+- https://stackoverflow.com/
+- https://medium.flutterdevs.com/
